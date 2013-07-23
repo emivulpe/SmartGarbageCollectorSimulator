@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
 import uk.ac.glasgow.etparser.events.Event;
+import uk.ac.glasgow.etparser.events.Event.Check;
 
 /**
  * A class to record all errors created by accesses to not born or dead objects
@@ -50,14 +51,14 @@ public class ErrorLogger implements EventHandler {
 	@Override
 	public void handle(Event e) {
 		String currentObjectID = e.getObjectID();
-		if (e.getCheck().equalsIgnoreCase("dead")) {
+		if (e.getCheck().equals(Check.DEAD)) {
 			logger.warn("The object with id " + currentObjectID
 					+ " is dead so you cannot update it!");
 
-		} else if (e.getCheck().equalsIgnoreCase("not born")) {
+		} else if (e.getCheck().equals(Check.NOTBORN)) {
 			logger.warn("The object with id " + currentObjectID
 					+ " is not born so you cannot update it!");
-		} else if (e.getCheck().equalsIgnoreCase("created")) {
+		} else if (e.getCheck().equals(Check.CREATED)) {
 			logger.warn("The object with id " + currentObjectID
 					+ " is already created so you cannot create it again!");
 

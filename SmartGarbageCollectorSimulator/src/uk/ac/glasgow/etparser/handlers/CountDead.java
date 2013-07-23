@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import uk.ac.glasgow.etparser.events.Event;
+import uk.ac.glasgow.etparser.events.Event.Check;
 
 /**
  * This class keeps track of all dead objects tried to be accessed illegally.
@@ -43,7 +44,7 @@ public class CountDead implements EventHandler, EventReport {
 	 */
 	@Override
 	public void handle(Event e) {
-		if (e.getCheck().equalsIgnoreCase("dead")) {
+		if (e.getCheck().equals(Check.DEAD)) {
 			dead.add(e.getObjectID());
 			System.out.println("Object with id " + e.getObjectID()
 					+ " is dead.");

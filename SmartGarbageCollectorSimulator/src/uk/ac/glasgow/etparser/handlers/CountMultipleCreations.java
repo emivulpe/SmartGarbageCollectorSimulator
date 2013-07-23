@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import uk.ac.glasgow.etparser.events.Event;
+import uk.ac.glasgow.etparser.events.Event.Check;
 
 /**
  * This class keeps track of all objects tried to be created more than
@@ -43,7 +44,7 @@ public class CountMultipleCreations implements EventHandler, EventReport {
 	 */
 	@Override
 	public void handle(Event e) {
-		if (e.getCheck().equalsIgnoreCase("created")) {
+		if (e.getCheck().equals(Check.CREATED)) {
 			multiples.add(e.getObjectID());
 			System.out.println("Object with id " + e.getObjectID()
 					+ " has been created more than once.");

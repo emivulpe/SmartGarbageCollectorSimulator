@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import uk.ac.glasgow.etparser.events.Event;
+import uk.ac.glasgow.etparser.events.Event.Check;
 
 /**
  * This class keeps track of all objects tried to be accessed before they were
@@ -45,7 +46,7 @@ public class CountNotBorn implements EventHandler, EventReport {
 	 */
 	@Override
 	public void handle(Event e) {
-		if (e.getCheck().equalsIgnoreCase("not born")) {
+		if (e.getCheck().equals(Check.NOTBORN)) {
 			notBorn.add(e.getObjectID());
 			System.out.println("Object with id " + e.getObjectID()
 					+ " is not born yet.");

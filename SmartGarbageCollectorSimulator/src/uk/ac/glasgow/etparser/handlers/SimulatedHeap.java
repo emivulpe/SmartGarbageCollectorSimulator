@@ -8,6 +8,7 @@ import java.util.Set;
 import uk.ac.glasgow.etparser.ObjectEventRecord;
 import uk.ac.glasgow.etparser.events.CreationEvent;
 import uk.ac.glasgow.etparser.events.Event;
+import uk.ac.glasgow.etparser.events.Event.Check;
 
 /**
  * This class simulates the heap and keeps track of the object ids and the last
@@ -123,7 +124,7 @@ public class SimulatedHeap implements EventHandler {
 
 		else if (existsInHeap && currentEventStatus.equalsIgnoreCase("A")) {
 
-			e.setCheck("created");
+			e.setCheck(Check.CREATED);
 
 		}
 		System.out.println(getNumObjects() + " total objects in heap"
@@ -134,7 +135,7 @@ public class SimulatedHeap implements EventHandler {
 		String currentObjectID = e.getObjectID();
 		ObjectEventRecord record = new ObjectEventRecord(e);
 		objectStates.put(currentObjectID, record);
-		e.setCheck("creation");
+		e.setCheck(Check.CREATION);
 		CreationEvent ce = (CreationEvent) e;
 		timeSize += ce.getSize();
 		System.out
@@ -148,7 +149,7 @@ public class SimulatedHeap implements EventHandler {
 		String currentObjectID = e.getObjectID();
 		ObjectEventRecord record = new ObjectEventRecord(e);
 		objectStates.put(currentObjectID, record);
-		e.setCheck("creation");
+		e.setCheck(Check.CREATION);
 		CreationEvent ce = new CreationEvent(e);
 		timeSize += ce.getSize();
 		System.out
@@ -163,7 +164,7 @@ public class SimulatedHeap implements EventHandler {
 		ObjectEventRecord record = objectStates.get(currentObjectID);
 		record.updateRecord(e);
 		objectStates.put(currentObjectID, record);
-		e.setCheck("legal");
+		e.setCheck(Check.LEGAL);
 		System.out.println(objectStates.get(currentObjectID).isAlive());
 		if (currentEventStatus.equalsIgnoreCase("M")
 				|| currentEventStatus.equalsIgnoreCase("E")) {
@@ -258,7 +259,6 @@ public class SimulatedHeap implements EventHandler {
 
 		System.out.println();
 		this.dealWithPreaccess = preaccess;
-		scanner.close();
 	}
 
 	private void askForPostaccess() {
@@ -278,7 +278,6 @@ public class SimulatedHeap implements EventHandler {
 			postaccess = scanner.next();
 		}
 		this.dealWithPostAccess = postaccess;
-		scanner.close();
 	}
 
 	private void handleIgnorePreaccess() {
@@ -304,7 +303,8 @@ public class SimulatedHeap implements EventHandler {
 	}
 	
 	public void removeRecord(String objectID){
-		theHeap.removeRecord(objectID);
+		objectStates.remove(objectID);
+		
 	}
 
 }

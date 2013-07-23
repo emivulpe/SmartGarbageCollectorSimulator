@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import uk.ac.glasgow.etparser.events.Event;
+import uk.ac.glasgow.etparser.events.Event.Check;
 
 /**
  * This class keeps track of all successfully created objects.
@@ -43,7 +44,7 @@ public class CountCreation implements EventHandler, EventReport {
 	@Override
 	public void handle(Event e) {
 
-		if (e.getCheck().equalsIgnoreCase("creation")) {
+		if (e.getCheck().equals(Check.CREATION)) {
 			created.add(e.getObjectID());
 			System.out.println("Object with id " + e.getObjectID()
 					+ " has been created.");

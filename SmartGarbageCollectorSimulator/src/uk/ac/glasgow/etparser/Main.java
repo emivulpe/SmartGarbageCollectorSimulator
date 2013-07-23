@@ -14,8 +14,8 @@ public class Main {
 		long startOfProcess = System.currentTimeMillis();
 		try {
 			InputStream fileStream = new FileInputStream(args[0]);
-			InputStream gzipStream = new GZIPInputStream(fileStream);
-			ETParser parser = new ETParser(gzipStream);
+			//InputStream gzipStream = new GZIPInputStream(fileStream);
+			ETParser parser = new ETParser(fileStream);
 			parser.processFile();
 			parser.printReport();
 			fileStream.close();
