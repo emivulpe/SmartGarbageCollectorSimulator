@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import uk.ac.glasgow.etparser.ACommandLineParser.WayToDeal;
 import uk.ac.glasgow.etparser.events.*;
 import uk.ac.glasgow.etparser.handlers.*;
 
@@ -32,6 +33,8 @@ public class ETParser {
 	 * any point of the program.
 	 */
 	private SimulatedHeap heap;
+	
+	private boolean setChartVisible;
 
 	/**
 	 * Constructor initializing the ETParser which takes an InputStream and does all its work using the information from the stream.
@@ -45,6 +48,22 @@ public class ETParser {
 		lines = 0;
 		heap = SimulatedHeap.getTheHeap();
 		initialiseHandlers();
+
+	}
+	public ETParser(InputStream input,WayToDeal preaccess,WayToDeal postaccess, boolean chart) {
+		this.input=input;
+		handlers = new ArrayList<EventHandler>();
+		lines = 0;
+		heap = SimulatedHeap.getTheHeap();
+		initialiseHandlers();
+		heap.setDealWithPostaccess(postaccess);
+		heap.setDealWithPreaccess(preaccess);
+		if(chart){
+			setChartVisible=true;
+		}
+		else{
+			setChartVisible=false;
+		}
 
 	}
 
@@ -129,7 +148,7 @@ public class ETParser {
 		registerHandler(notBorns);
 		EventHandler logger = new ErrorLogger();
 		registerHandler(logger);
-		EventHandler livesize = new LiveSize();
+		EventHandler livesize = new LiveSize(setChartVisible);
 		registerHandler(livesize);
 
 	}

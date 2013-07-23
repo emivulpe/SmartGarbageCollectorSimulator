@@ -15,14 +15,14 @@ public class Main {
 		try {
 			InputStream fileStream = new FileInputStream(args[0]);
 			//InputStream gzipStream = new GZIPInputStream(fileStream);
-			ETParser parser = new ETParser(fileStream);
-			parser.processFile();
-			parser.printReport();
+			ETParser etparser = new ETParser(fileStream);
+			etparser.processFile();
+			etparser.printReport();
 			fileStream.close();
 			long endOfProcess = System.currentTimeMillis();
 			long timeTakenInMillisecs = endOfProcess - startOfProcess;
 			long timeTakenInSeconds = timeTakenInMillisecs / 1000;
-			long linesPerSecond = parser.getLines() / timeTakenInSeconds;
+			long linesPerSecond = etparser.getLines() / timeTakenInSeconds;
 
 			System.out.println("The program reads " + linesPerSecond
 					+ " lines per second");

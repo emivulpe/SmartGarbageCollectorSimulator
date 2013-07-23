@@ -15,6 +15,7 @@ public class CreationEvent extends Event{
 		
 		System.out.println(s+"  ssssssssssssssssssssssss");
 		size = Integer.parseInt(s.trim(), 16); 
+		System.out.println(size+"sizeeeeeeeeeeeee");
 		
 		status = "A";
 		scan.close();

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
+import uk.ac.glasgow.etparser.ACommandLineParser.WayToDeal;
 import uk.ac.glasgow.etparser.ObjectEventRecord;
 import uk.ac.glasgow.etparser.events.CreationEvent;
 import uk.ac.glasgow.etparser.events.Event;
@@ -49,11 +50,11 @@ public class SimulatedHeap implements EventHandler {
 	 * that were not born.
 	 */
 	private Set<String> processedObjects;
-	
+
 
 
 	@SuppressWarnings("unused")
-	private String dealWithPreaccess, dealWithPostAccess;
+	private WayToDeal dealWithPreaccess, dealWithPostAccess;
 
 	/**
 	 * Initializes the class variables. Private because of Singleton design
@@ -65,9 +66,20 @@ public class SimulatedHeap implements EventHandler {
 		timeMethod = 0;
 		objectStates = new HashMap<String, ObjectEventRecord>();
 		processedObjects = new HashSet<String>();
-		displayChoices();
-		askForPreaccess();
-		askForPostaccess();
+
+	}
+
+	public void setDealWithPreaccess(WayToDeal wayToDeal){
+
+		dealWithPreaccess=wayToDeal;
+
+
+
+	}
+
+	public void setDealWithPostaccess(WayToDeal wayToDeal){
+		dealWithPostAccess=wayToDeal;
+
 	}
 
 	/**
@@ -100,24 +112,26 @@ public class SimulatedHeap implements EventHandler {
 
 		// free and status "A"
 		if (!existsInHeap && currentEventStatus.equalsIgnoreCase("A")) {
+			e.setCheck(Check.CREATION);
 			allocateObject(e);
 
 		}
 
 		// free but not status "A"- preaccess
 		else if (!existsInHeap && !currentEventStatus.equalsIgnoreCase("A")) {
-
+			e.setCheck(Check.NOTBORN);
 			decisionMakerPreaccess(e);
 
 			// dead-postaccess
 		} else if (existsInHeap && !objectStates.get(currentObjectID).isAlive()) {
-
+			e.setCheck(Check.DEAD);
 			decisionMakerPostaccess();
 
 		}
 
 		// occupied and alive
 		else if (existsInHeap && objectStates.get(currentObjectID).isAlive()) {
+			e.setCheck(Check.LEGAL);
 			updateObject(e);
 
 		}
@@ -139,12 +153,12 @@ public class SimulatedHeap implements EventHandler {
 		CreationEvent ce = (CreationEvent) e;
 		timeSize += ce.getSize();
 		System.out
-				.println(timeSize
-						+ " timesizeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+		.println(timeSize
+				+ " timesizeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
 
 	}
 
-	
+
 	private void allocateObjectCheater(Event e) {
 		String currentObjectID = e.getObjectID();
 		ObjectEventRecord record = new ObjectEventRecord(e);
@@ -153,8 +167,8 @@ public class SimulatedHeap implements EventHandler {
 		CreationEvent ce = new CreationEvent(e);
 		timeSize += ce.getSize();
 		System.out
-				.println(timeSize
-						+ " timesizeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+		.println(timeSize
+				+ " timesizeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
 
 	}
 
@@ -174,18 +188,25 @@ public class SimulatedHeap implements EventHandler {
 	}
 
 	private void decisionMakerPreaccess(Event e) {
-		if (dealWithPreaccess.equalsIgnoreCase("First access")) {
+
+		switch (dealWithPreaccess){
+		case MOVE:
 			handleAllocateAtFirstAccess(e);
-		} else {
+			break;
+		default:
 			handleIgnorePreaccess();
+
 		}
 	}
 
 	private void decisionMakerPostaccess() {
-		if (dealWithPreaccess.equalsIgnoreCase("Move")) {
+		switch (dealWithPostAccess){
+		case MOVE:
 			handleMoveDeath();
-		} else {
+			break;
+		default:
 			handleIgnorePostaccess();
+
 		}
 	}
 
@@ -231,67 +252,22 @@ public class SimulatedHeap implements EventHandler {
 		return timeMethod;
 	}
 
-	private void displayChoices() {
-
-		System.out
-				.println("Hello, dear user! Before you start the smart garbage collector simulator"
-						+ " you must choose how to deal with pre-access and post-access errors.");
-		System.out.println();
-	}
-
-	private void askForPreaccess() {
-		System.out.println("First choose dealing with pre-access errors:");
-		System.out.println();
-		System.out.println("Enter 'Ignore' to ignore them.");
-		System.out
-				.println("Enter 'Beginning' to allocate them at the beginning of the program.");
-		System.out
-				.println("Enter 'First access' to allocate them at the first attempt to access unborn objects");
-		System.out.println();
-		Scanner scanner = new Scanner(System.in);
-		String preaccess = scanner.nextLine();
-		while (!preaccess.equalsIgnoreCase("Ignore")
-				&& !preaccess.equalsIgnoreCase("Beginning")
-				&& !preaccess.equalsIgnoreCase("First access")) {
-			System.out.println("Please enter a valid option");
-			preaccess = scanner.next();
-		}
-
-		System.out.println();
-		this.dealWithPreaccess = preaccess;
-	}
-
-	private void askForPostaccess() {
-
-		System.out.println("Now choose dealing with post-access errors");
-		System.out.println();
-		System.out.println("Enter 'Ignore' to ignore them.");
-		System.out
-				.println("Enter 'Move' to kill objects at the end of the program.");
-		System.out.println("Enter 'Don't count' not to count these errors");
-		Scanner scanner = new Scanner(System.in);
-		String postaccess = scanner.nextLine();
-		while (!postaccess.equalsIgnoreCase("Ignore")
-				&& !postaccess.equalsIgnoreCase("Move")
-				&& !postaccess.equalsIgnoreCase("Don't count")) {
-			System.out.println("Please enter a valid option");
-			postaccess = scanner.next();
-		}
-		this.dealWithPostAccess = postaccess;
-	}
 
 	private void handleIgnorePreaccess() {
+		System.out.println("ignore preaccess");
 		// as this method just ignores preaccess it doesn't do anything
 
 	}
 
 	private void handleAllocateAtFirstAccess(Event e) {
+		System.out.println("allocate at first access");
 		allocateObjectCheater(e);
 		updateObject(e);
 
 	}
 
 	private void handleIgnorePostaccess() {
+		System.out.println("ignore postaccess");
 		// as this method just ignores postaccess it doesn't do anything
 
 	}
@@ -299,12 +275,15 @@ public class SimulatedHeap implements EventHandler {
 	// no need for this in my opinion. we don't need an object to be dead to
 	// collect it
 	private void handleMoveDeath() {
+		System.out.println("move death");
+
+	}
+
+	public void removeRecord(String objectID){
+		objectStates.remove(objectID);
 
 	}
 	
-	public void removeRecord(String objectID){
-		objectStates.remove(objectID);
-		
-	}
+	
 
 }
