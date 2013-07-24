@@ -27,7 +27,7 @@ public class LiveSizeChart extends ApplicationFrame {
 	private int livesize;
 	private XYSeries data;
 	
-	public LiveSizeChart() {
+	public LiveSizeChart(boolean visible) {
 		
 		super("Live size chart");
 		
@@ -49,7 +49,9 @@ public class LiveSizeChart extends ApplicationFrame {
         // add it to our application
         setContentPane(chartPanel);
         pack();
-        setVisible(true);
+		System.out.println(visible+"chaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaart in chart");
+        setVisible(visible);
+
 
 //		dataset = (XYSeriesCollection) createDataset();
 //		chart = createChart(dataset);
@@ -60,18 +62,7 @@ public class LiveSizeChart extends ApplicationFrame {
 	}
 	
 	public void updateChart(double x,double y){
-		    	try {
-		    		Thread.sleep(1000);
-		    	} catch (Exception e) {
-		    		System.err.println("Exception whilst sleeping.");
-		    		System.err.println(e);
-		    		e.printStackTrace();
-		    		System.exit(-1);
-		    	}
 		    	data.add(x,y);
-		
-	
-  
     }
 
 
@@ -142,33 +133,33 @@ public class LiveSizeChart extends ApplicationFrame {
 //
 //	}
 
-
-	// ****************************************************************************
-	// * JFREECHART DEVELOPER GUIDE *
-	// * The JFreeChart Developer Guide, written by David Gilbert, is
-	// available *
-	// * to purchase from Object Refinery Limited: *
-	// * *
-	// * http://www.object-refinery.com/jfreechart/guide.html *
-	// * *
-	// * Sales are used to provide funding for the JFreeChart project -
-	// please *
-	// * support us so that we can continue developing free software. *
-	// ****************************************************************************
-
-	/**
-	 * Starting point for the demonstration application.
-	 * 
-	 * @param args
-	 *            ignored.
-	 */
-	public void main(final String[] args) {
-
-		final LiveSizeChart demo = new LiveSizeChart();
-		demo.pack();
-		RefineryUtilities.centerFrameOnScreen(demo);
-		demo.setVisible(true);
-
-	}
+//
+//	// ****************************************************************************
+//	// * JFREECHART DEVELOPER GUIDE *
+//	// * The JFreeChart Developer Guide, written by David Gilbert, is
+//	// available *
+//	// * to purchase from Object Refinery Limited: *
+//	// * *
+//	// * http://www.object-refinery.com/jfreechart/guide.html *
+//	// * *
+//	// * Sales are used to provide funding for the JFreeChart project -
+//	// please *
+//	// * support us so that we can continue developing free software. *
+//	// ****************************************************************************
+//
+//	/**
+//	 * Starting point for the demonstration application.
+//	 * 
+//	 * @param args
+//	 *            ignored.
+//	 */
+//	public void main(final String[] args) {
+//
+//		final LiveSizeChart demo = new LiveSizeChart(true);
+//		demo.pack();
+//		RefineryUtilities.centerFrameOnScreen(demo);
+//		demo.setVisible(true);
+//
+//	}
 
 }

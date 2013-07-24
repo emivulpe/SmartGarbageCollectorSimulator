@@ -45,7 +45,7 @@ public class ACommandLineParser {
 		options.addOption("ch", false, "display a livechart");
 		options.addOption("r", true, "number of times to repeat the run");
 		options.addOption("f",true,"input file name");
-		options.addOption("unborn",true,"how to deal with unborn accesses");
+		options.addOption("unborn",true,"how to deal with unborn accesses: ignore or move");
 		options.addOption("dead",true,"how to deal with dead accesses");
 		options.addOption("h",false,"ask for help");
 		
@@ -81,11 +81,13 @@ public class ACommandLineParser {
 		interactive = cmd.hasOption("i");
 		chart = cmd.hasOption("ch");
 		help=cmd.hasOption("h");
-		
+//		System.out.println(chart+"chaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaart");
 		// Want at least time or date
 		if (help) {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp( "CommandlineParser", options );
+			System.exit(0);
+			
 		}
 		if (!cmd.hasOption("f")){
 			HelpFormatter formatter = new HelpFormatter();
@@ -103,11 +105,11 @@ public class ACommandLineParser {
 				askForPreaccess();
 				askForPostaccess();
 				}
-				
-			if (chart)
-				lchart=new LiveSizeChart();
-				if(lchart!=null) lchart.setVisible(true);
-			}
+//				
+//			if (chart)
+//				lchart=new LiveSizeChart();
+//				if(lchart!=null) lchart.setVisible(true);
+		}
 		
 		
 
@@ -116,6 +118,7 @@ public class ACommandLineParser {
 		try {
 			InputStream fileStream = new FileInputStream(inputFile);
 			//InputStream gzipStream = new GZIPInputStream(fileStream);
+			System.out.println(chart+"chaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaart");
 			ETParser etparser = new ETParser(fileStream,preaccess,postaccess,chart);
 			etparser.processFile();
 			etparser.printReport();

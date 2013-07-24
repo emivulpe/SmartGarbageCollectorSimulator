@@ -34,7 +34,7 @@ public class ETParser {
 	 */
 	private SimulatedHeap heap;
 	
-	private boolean setChartVisible;
+	private boolean chartVisible;
 
 	/**
 	 * Constructor initializing the ETParser which takes an InputStream and does all its work using the information from the stream.
@@ -58,12 +58,10 @@ public class ETParser {
 		initialiseHandlers();
 		heap.setDealWithPostaccess(postaccess);
 		heap.setDealWithPreaccess(preaccess);
-		if(chart){
-			setChartVisible=true;
-		}
-		else{
-			setChartVisible=false;
-		}
+		System.out.println(chart+"chaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaart in etparser");
+		chartVisible=chart;
+		initialiseHandlers();
+		System.out.println(chartVisible+"chaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaart in etpaser2");
 
 	}
 
@@ -148,7 +146,8 @@ public class ETParser {
 		registerHandler(notBorns);
 		EventHandler logger = new ErrorLogger();
 		registerHandler(logger);
-		EventHandler livesize = new LiveSize(setChartVisible);
+		System.out.println(chartVisible+"chaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaart in parser");
+		EventHandler livesize = new LiveSize(chartVisible);
 		registerHandler(livesize);
 
 	}

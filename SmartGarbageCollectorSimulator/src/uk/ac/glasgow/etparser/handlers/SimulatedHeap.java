@@ -1,11 +1,17 @@
 package uk.ac.glasgow.etparser.handlers;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
 import uk.ac.glasgow.etparser.ACommandLineParser.WayToDeal;
+import uk.ac.glasgow.etparser.ObjectClass.EventType;
+import uk.ac.glasgow.etparser.ObjectClass;
 import uk.ac.glasgow.etparser.ObjectEventRecord;
 import uk.ac.glasgow.etparser.events.CreationEvent;
 import uk.ac.glasgow.etparser.events.Event;
@@ -44,7 +50,7 @@ public class SimulatedHeap implements EventHandler {
 	 * A hash map that keeps the object id and the last event that happened to
 	 * that object.
 	 */
-	private HashMap<String, ObjectEventRecord> objectStates;
+	private HashMap<String, ObjectClass> objectStates;
 	/**
 	 * A set of all the objects tried to be accessed ever including the once
 	 * that were not born.
@@ -64,7 +70,7 @@ public class SimulatedHeap implements EventHandler {
 		timeSequence = 0;
 		timeSize = 0;
 		timeMethod = 0;
-		objectStates = new HashMap<String, ObjectEventRecord>();
+		objectStates = new HashMap<String, ObjectClass>();
 		processedObjects = new HashSet<String>();
 
 	}
@@ -111,9 +117,9 @@ public class SimulatedHeap implements EventHandler {
 		String currentEventStatus = e.getStatus();
 
 		// free and status "A"
-		if (!existsInHeap && currentEventStatus.equalsIgnoreCase("A")) {
+		if (!existsInHeap && e instanceof CreationEvent ) {
 			e.setCheck(Check.CREATION);
-			allocateObject(e);
+			allocateObject((CreationEvent) e);
 
 		}
 
@@ -123,14 +129,14 @@ public class SimulatedHeap implements EventHandler {
 			decisionMakerPreaccess(e);
 
 			// dead-postaccess
-		} else if (existsInHeap && !objectStates.get(currentObjectID).isAlive()) {
+		} else if (existsInHeap && objectStates.get(currentObjectID).getLastEvent()==EventType.DEATH) {
 			e.setCheck(Check.DEAD);
 			decisionMakerPostaccess();
 
 		}
 
 		// occupied and alive
-		else if (existsInHeap && objectStates.get(currentObjectID).isAlive()) {
+		else if (existsInHeap && objectStates.get(currentObjectID).getLastEvent()!=EventType.DEATH) {
 			e.setCheck(Check.LEGAL);
 			updateObject(e);
 
@@ -145,10 +151,12 @@ public class SimulatedHeap implements EventHandler {
 				+ processedObjects);
 	}
 
-	private void allocateObject(Event e) {
+	private void allocateObject(CreationEvent e) {
 		String currentObjectID = e.getObjectID();
-		ObjectEventRecord record = new ObjectEventRecord(e);
-		objectStates.put(currentObjectID, record);
+		int size=e.getSize();
+		ObjectClass object=new ObjectClass(size,timeSequence,currentObjectID);
+//		ObjectEventRecord record = new ObjectEventRecord(e);
+		objectStates.put(currentObjectID, object);
 		e.setCheck(Check.CREATION);
 		CreationEvent ce = (CreationEvent) e;
 		timeSize += ce.getSize();
@@ -161,8 +169,10 @@ public class SimulatedHeap implements EventHandler {
 
 	private void allocateObjectCheater(Event e) {
 		String currentObjectID = e.getObjectID();
-		ObjectEventRecord record = new ObjectEventRecord(e);
-		objectStates.put(currentObjectID, record);
+		ObjectClass object=new ObjectClass(0,timeSequence,currentObjectID);
+		
+//		ObjectEventRecord record = new ObjectEventRecord(e);
+		objectStates.put(currentObjectID, object);
 		e.setCheck(Check.CREATION);
 		CreationEvent ce = new CreationEvent(e);
 		timeSize += ce.getSize();
@@ -174,12 +184,16 @@ public class SimulatedHeap implements EventHandler {
 
 	private void updateObject(Event e) {
 		String currentObjectID = e.getObjectID();
+		ObjectClass accessedObject=objectStates.get(currentObjectID);
+		
 		String currentEventStatus = e.getStatus();
-		ObjectEventRecord record = objectStates.get(currentObjectID);
-		record.updateRecord(e);
-		objectStates.put(currentObjectID, record);
+//		ObjectEventRecord record = objectStates.get(currentObjectID);
+//		record.updateRecord(e);
+		
+		accessedObject.updateEvent(timeSequence, e.getStatus());
+		objectStates.put(currentObjectID, accessedObject);
 		e.setCheck(Check.LEGAL);
-		System.out.println(objectStates.get(currentObjectID).isAlive());
+//		System.out.println(objectStates.get(currentObjectID).isAlive());
 		if (currentEventStatus.equalsIgnoreCase("M")
 				|| currentEventStatus.equalsIgnoreCase("E")) {
 			timeMethod++;
@@ -224,7 +238,7 @@ public class SimulatedHeap implements EventHandler {
 	 *            the id of the object we want to access in the heap.
 	 * @return the last event record for the given object.
 	 */
-	public ObjectEventRecord getRecord(String oid) {
+	public ObjectClass getRecord(String oid) {
 		return objectStates.get(oid);
 	}
 
@@ -282,6 +296,26 @@ public class SimulatedHeap implements EventHandler {
 	public void removeRecord(String objectID){
 		objectStates.remove(objectID);
 
+	}
+	
+	
+	public List<ObjectClass> getListOfObjectClassSorted(){
+		ArrayList<ObjectClass> listOfObjects=new ArrayList<ObjectClass>();
+		for (ObjectClass obj:objectStates.values()){
+			listOfObjects.add(obj);
+			
+		}
+		
+	
+		
+		Collections.sort(listOfObjects, new Comparator<ObjectClass>(){
+			public int compare(ObjectClass o1,ObjectClass o2){
+				return Integer.compare(o1.getTimeOfLastEvent(),o2.getTimeOfLastEvent());
+				
+			}
+		});
+		
+		return listOfObjects;
 	}
 	
 	

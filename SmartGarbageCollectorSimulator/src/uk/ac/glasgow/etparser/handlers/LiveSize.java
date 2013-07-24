@@ -44,10 +44,8 @@ public class LiveSize implements EventHandler {
 		allocatedMemorySize = 0;
 		numCreationsOrDeaths = 0;
 		allocatedObjects = new LinkedList<String>();
-		chart=new LiveSizeChart();
-		if(chartVisible){
-			chart.setVisible(true);
-		}
+		System.out.println(chartVisible+"chaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaart in ls");
+		chart=new LiveSizeChart(chartVisible);
 
 	}
 	
@@ -68,6 +66,9 @@ public class LiveSize implements EventHandler {
 		}
 	}
 
+	public void deallocateLeastRecentlyUsedObjects(){
+		
+	}
 	// getters
 
 	public long getLiveSize() {
@@ -133,7 +134,7 @@ public class LiveSize implements EventHandler {
 
 	public LiveSizeChart createChart() {
 
-		LiveSizeChart chart = new LiveSizeChart();
+		LiveSizeChart chart = new LiveSizeChart(true);
 
 		return chart;
 	}
