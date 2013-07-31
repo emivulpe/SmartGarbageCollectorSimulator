@@ -3,10 +3,10 @@ package uk.ac.glasgow.etparser.handlers.EventReporters;
 import java.util.HashSet;
 import java.util.Set;
 
+import uk.ac.glasgow.etparser.ETParser;
 import uk.ac.glasgow.etparser.events.Event;
 import uk.ac.glasgow.etparser.events.Event.Check;
 import uk.ac.glasgow.etparser.handlers.EventHandler;
-
 
 /**
  * This class keeps track of all successfully created objects.
@@ -46,10 +46,10 @@ public class CountCreation implements EventHandler, EventReport {
 	@Override
 	public void handle(Event e) {
 
-		if (e.getCheck()!=null&&e.getCheck().equals(Check.CREATION)) {
+		if (e.getCheck() != null && e.getCheck().equals(Check.CREATION)) {
 			created.add(e.getObjectID());
-			System.out.println("Object with id " + e.getObjectID()
-					+ " has been created.");
+			// System.out.println("Object with id " + e.getObjectID()
+			// + " has been created.");
 		}
 
 	}
@@ -60,8 +60,17 @@ public class CountCreation implements EventHandler, EventReport {
 	 */
 	@Override
 	public String finalReport() {
-		return (float) created.size()
-				/ totalObjectsInHeap * PERCENTAGE
+		// if statistics logger wanted by the user- log the info into the
+		// file...
+		// do the same with all other evert reporters!
+		if (ETParser.getLogger() != null) {
+			ETParser.getLogger()
+					.getLogger()
+					.info((float) created.size() / totalObjectsInHeap
+							* PERCENTAGE
+							+ " % objects were created successfully");
+		}
+		return (float) created.size() / totalObjectsInHeap * PERCENTAGE
 				+ " % objects were created successfully";
 	}
 

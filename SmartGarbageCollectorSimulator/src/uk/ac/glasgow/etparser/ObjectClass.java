@@ -8,8 +8,6 @@ public class ObjectClass {
 	private int timeOfLastEvent;
 	private String id;
 
-
-
 	private TypeOfEvent lastEvent;
 
 	public ObjectClass(int s, int t, String id) {
@@ -18,10 +16,6 @@ public class ObjectClass {
 		this.id = id;
 		lastEvent = TypeOfEvent.ALLOCATION;
 
-	}
-
-	public ObjectClass() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public int getSize() {
@@ -49,6 +43,5 @@ public class ObjectClass {
 		lastEvent = event;
 
 	}
-
 
 }

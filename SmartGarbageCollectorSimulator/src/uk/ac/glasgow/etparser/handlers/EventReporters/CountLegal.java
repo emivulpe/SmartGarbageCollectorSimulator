@@ -3,6 +3,7 @@ package uk.ac.glasgow.etparser.handlers.EventReporters;
 import java.util.HashSet;
 import java.util.Set;
 
+import uk.ac.glasgow.etparser.ETParser;
 import uk.ac.glasgow.etparser.events.Event;
 import uk.ac.glasgow.etparser.events.Event.Check;
 import uk.ac.glasgow.etparser.handlers.EventHandler;
@@ -44,10 +45,10 @@ public class CountLegal implements EventHandler, EventReport {
 	 */
 	@Override
 	public void handle(Event e) {
-		if (e.getCheck()!=null&&e.getCheck().equals(Check.LEGAL)) {
+		if (e.getCheck() != null && e.getCheck().equals(Check.LEGAL)) {
 			legals.add(e.getObjectID());
-			System.out.println("Object with id " + e.getObjectID()
-					+ " has been updated.");
+			// System.out.println("Object with id " + e.getObjectID()
+			// + " has been updated.");
 		}
 
 	}
@@ -59,8 +60,15 @@ public class CountLegal implements EventHandler, EventReport {
 	@Override
 	public String finalReport() {
 
-		return (float) legals.size()
-				/ totalObjectsInHeap * PERCENTAGE
+		if (ETParser.getLogger() != null) {
+			ETParser.getLogger()
+					.getLogger()
+					.info((float) legals.size() / totalObjectsInHeap
+							* PERCENTAGE
+							+ " % objects were updates successfully");
+		}
+
+		return (float) legals.size() / totalObjectsInHeap * PERCENTAGE
 				+ " % objects were updated successfully";
 	}
 

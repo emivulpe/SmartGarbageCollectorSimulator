@@ -6,7 +6,8 @@ import java.io.InputStream;
 import java.util.Scanner;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import uk.ac.glasgow.etparser.events.CreationEvent;
+
+import uk.ac.glasgow.etparser.events.Event;
 import uk.ac.glasgow.etparser.handlers.EventHandler;
 import uk.ac.glasgow.etparser.handlers.EventReporters.EventReport;
 import uk.ac.glasgow.etparser.handlers.Heap;
@@ -19,14 +20,16 @@ public class ETParserTest {
 	@BeforeClass
 	public static void setUp() throws Exception {
 		System.out.println("file: ");
-		String f=new Scanner(System.in).nextLine();
+		Scanner scanner=new Scanner(System.in);
+		String f = scanner.nextLine();
+		scanner.close();
 		is = new FileInputStream(f);
-		parser = new ETParser(is,new Heap());
+		parser = new ETParser(is, new Heap());
 	}
 
 	@Test
 	public void testConstructor() {
-		ETParser et = new ETParser(is,new Heap());
+		ETParser et = new ETParser(is, new Heap());
 		assertEquals(0, et.getLines());
 		assertTrue(et.getHandlers() != null);
 		assertTrue(ETParser.getTheHeap() != null);
@@ -47,12 +50,12 @@ public class ETParserTest {
 	@Test
 	public void testRegister() {
 		parser.registerHandler(new EventHandlerTester());
-		assertEquals(parser.getHandlers().size(),8);
+		assertEquals(parser.getHandlers().size(), 8);
 	}
 
 	@Test
 	public void testNotifyHandlers() {
-		CreationEvent e = new CreationEvent("s wt 44 10a");
+		Event e = new Event("s wt 44 10a");
 		EventHandlerTester tester = new EventHandlerTester();
 		parser.registerHandler(tester);
 		parser.notifyHandlers(e);

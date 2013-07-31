@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -12,6 +13,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import uk.ac.glasgow.etparser.handlers.ErrorLogger;
+import uk.ac.glasgow.etparser.handlers.EventHandler;
 import uk.ac.glasgow.etparser.handlers.Heap;
 import uk.ac.glasgow.etparser.handlers.SmartHeapFIFO;
 import uk.ac.glasgow.etparser.handlers.SmartHeapLeastRecentlyUsed;
@@ -21,6 +24,8 @@ public class CommandParser {
 	private static boolean interactive = false;
 	private static boolean chart = false;
 	private static boolean help = false;
+	private static EventHandler errorLogger;
+	private static boolean statisticsLogger;
 
 	// default would be to ignore these errors. if unborn or dead in args
 	// specify...
@@ -31,8 +36,9 @@ public class CommandParser {
 
 	private static String inputFile;
 
-	private static Heap heap; //default if to run the normal heap.
-								  //If the user chose a heuristic-change it.
+	private static Heap heap; // default if to run the normal heap.
+								// If the user chose a heuristic-change it.
+
 	public enum WayToDealWithErrors {
 		IGNORE, MOVE
 	};
@@ -62,6 +68,10 @@ public class CommandParser {
 		options.addOption("h", false, "ask for help");
 		options.addOption("heuristic", true,
 				"choose a heuristic for deleting objects");
+		options.addOption("el", false,
+				"do you want an error logger to show errors?");
+		options.addOption("sl", false,
+				"do you want an statistics logger to record the statistics?");
 
 		// Parse the arguments
 		CommandLineParser parser = new BasicParser();
@@ -87,18 +97,24 @@ public class CommandParser {
 		if (cmd.hasOption("dead")) {
 			postaccess = wayToDealEnumConverter(cmd.getOptionValue("dead"));
 		}
-		/**
-		 * TODO
-		 */
+
+		if (cmd.hasOption("el")) {
+			errorLogger = new ErrorLogger();
+		}
+
 		if (cmd.hasOption("heuristic")) {
 			heuristic = heuristicEnumConverter(cmd.getOptionValue("heuristic"));
-			switch(heuristic){
-			case FIRST: heap=new SmartHeapFIFO(); break;
-			case LEASTRECENTLYUSED: heap=new SmartHeapLeastRecentlyUsed();break;
+			switch (heuristic) {
+			case FIRST:
+				heap = new SmartHeapFIFO();
+				break;
+			case LEASTRECENTLYUSED:
+				heap = new SmartHeapLeastRecentlyUsed();
+				break;
 			}
 		}
-		if (!cmd.hasOption("heuristic")){
-			heap=new Heap();
+		if (!cmd.hasOption("heuristic")) {
+			heap = new Heap();
 		}
 
 		if (cmd.hasOption("f"))
@@ -108,6 +124,7 @@ public class CommandParser {
 		interactive = cmd.hasOption("i");
 		chart = cmd.hasOption("ch");
 		help = cmd.hasOption("h");
+		statisticsLogger = cmd.hasOption("sl");
 
 		// Want at least time or date
 		if (help) {
@@ -132,24 +149,33 @@ public class CommandParser {
 			}
 
 		}
-		if(chart){
+		if (chart) {
 			Heap.createChart();
 		}
 
-		// ErrorLogger logger = new ErrorLogger();
 		long startOfProcess = System.currentTimeMillis();
 		try {
 			InputStream fileStream = new FileInputStream(inputFile);
-			// InputStream gzipStream = new GZIPInputStream(fileStream);
-			ETParser etparser = new ETParser(fileStream,heap, preaccess, postaccess);
+			InputStream gzipStream = new GZIPInputStream(fileStream);
+			ETParser etparser = new ETParser(gzipStream, heap, preaccess,
+					postaccess);
+			if (errorLogger != null) {
+				etparser.registerHandler(errorLogger);
+
+			}
+			if (statisticsLogger) {
+				etparser.addStatsLogger();
+			}
 			etparser.processFile();
 			etparser.printReport();
 			fileStream.close();
 			long endOfProcess = System.currentTimeMillis();
 			long timeTakenInMillisecs = endOfProcess - startOfProcess;
 			long timeTakenInSeconds = timeTakenInMillisecs / 1000;
+			long timeTakenInMinutes = timeTakenInSeconds / 60;
 			long linesPerSecond = etparser.getLines() / timeTakenInSeconds;
 
+			System.out.println("Time taken " + timeTakenInMinutes + " minutes");
 			System.out.println("The program reads " + linesPerSecond
 					+ " lines per second");
 		}
@@ -160,7 +186,6 @@ public class CommandParser {
 		}
 
 	}
-
 
 	private static void displayChoices() {
 

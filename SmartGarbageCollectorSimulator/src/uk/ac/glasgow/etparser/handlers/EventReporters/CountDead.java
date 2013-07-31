@@ -3,10 +3,10 @@ package uk.ac.glasgow.etparser.handlers.EventReporters;
 import java.util.HashSet;
 import java.util.Set;
 
+import uk.ac.glasgow.etparser.ETParser;
 import uk.ac.glasgow.etparser.events.Event;
 import uk.ac.glasgow.etparser.events.Event.Check;
 import uk.ac.glasgow.etparser.handlers.EventHandler;
-
 
 /**
  * This class keeps track of all dead objects tried to be accessed illegally.
@@ -46,10 +46,10 @@ public class CountDead implements EventHandler, EventReport {
 	 */
 	@Override
 	public void handle(Event e) {
-		if (e.getCheck()!=null&&e.getCheck().equals(Check.DEAD)) {
+		if (e.getCheck() != null && e.getCheck().equals(Check.DEAD)) {
 			dead.add(e.getObjectID());
-			System.out.println("Object with id " + e.getObjectID()
-					+ " is dead.");
+			// System.out.println("Object with id " + e.getObjectID()
+			// + " is dead.");
 		}
 
 	}
@@ -61,8 +61,14 @@ public class CountDead implements EventHandler, EventReport {
 	@Override
 	public String finalReport() {
 
-		return (float) dead.size() / totalObjectsInHeap
-				* PERCENTAGE + " % objects cause dead error";
+		if (ETParser.getLogger() != null) {
+			ETParser.getLogger()
+					.getLogger()
+					.info((float) dead.size() / totalObjectsInHeap * PERCENTAGE
+							+ " % objects cause dead error");
+		}
+		return (float) dead.size() / totalObjectsInHeap * PERCENTAGE
+				+ " % objects cause dead error";
 	}
 
 }

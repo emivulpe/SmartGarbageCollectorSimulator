@@ -3,6 +3,7 @@ package uk.ac.glasgow.etparser.handlers.EventReporters;
 import java.util.HashSet;
 import java.util.Set;
 
+import uk.ac.glasgow.etparser.ETParser;
 import uk.ac.glasgow.etparser.events.Event;
 import uk.ac.glasgow.etparser.events.Event.Check;
 import uk.ac.glasgow.etparser.handlers.EventHandler;
@@ -46,8 +47,8 @@ public class CountMultipleCreations implements EventHandler, EventReport {
 	public void handle(Event e) {
 		if (e.getCheck().equals(Check.CREATED)) {
 			multiples.add(e.getObjectID());
-			System.out.println("Object with id " + e.getObjectID()
-					+ " has been created more than once.");
+			// System.out.println("Object with id " + e.getObjectID()
+			// + " has been created more than once.");
 		}
 
 	}
@@ -58,9 +59,14 @@ public class CountMultipleCreations implements EventHandler, EventReport {
 	 */
 	@Override
 	public String finalReport() {
-		// TODO Auto-generated method stub
-		return (float) multiples.size()
-				/ totalObjectsInHeap * PERCENTAGE
+		if (ETParser.getLogger() != null) {
+			ETParser.getLogger()
+					.getLogger()
+					.info((float) multiples.size() / totalObjectsInHeap
+							* PERCENTAGE
+							+ " % objects were created more than once.");
+		}
+		return (float) multiples.size() / totalObjectsInHeap * PERCENTAGE
 				+ " % objects were created more than once";
 	}
 

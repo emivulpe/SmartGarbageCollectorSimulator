@@ -1,11 +1,9 @@
 package uk.ac.glasgow.etparser;
-import java.io.FileInputStream;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-import uk.ac.glasgow.etparser.CommandParser.Heuristic;
 import uk.ac.glasgow.etparser.CommandParser.WayToDealWithErrors;
 import uk.ac.glasgow.etparser.events.*;
 import uk.ac.glasgow.etparser.handlers.*;
@@ -17,10 +15,11 @@ import uk.ac.glasgow.etparser.handlers.EventReporters.CountNotBorn;
 import uk.ac.glasgow.etparser.handlers.EventReporters.EventReport;
 
 /**
- *  This class parses a file into lines, keeps a list of event
- *         handlers and every time an event occurs it notifies them. It also
- *         prints a report of the percentage and kind of errors caused by
- *         attempt to access not born or dead objects.
+ * This class parses a file into lines, keeps a list of event handlers and every
+ * time an event occurs it notifies them. It also prints a report of the
+ * percentage and kind of errors caused by attempt to access not born or dead
+ * objects.
+ * 
  * @author Emi
  * @version 1.0
  */
@@ -32,6 +31,7 @@ public class ETParser {
 	/**
 	 * This variable counts the lines read so far.
 	 */
+	private static StatisticsLogger stats;
 	private int lines;
 	private InputStream input;
 	/**
@@ -40,25 +40,27 @@ public class ETParser {
 	 * any point of the program.
 	 */
 	private static Heap heap;
-	
 
 	/**
-	 * Constructor initializing the ETParser which takes an InputStream and does all its work using the information from the stream.
+	 * Constructor initializing the ETParser which takes an InputStream and does
+	 * all its work using the information from the stream.
+	 * 
 	 * @param input
 	 *            : the file to be parsed
 	 */
-	
 
 	public ETParser(InputStream input, Heap h) {
-		this.input=input;
+		this.input = input;
 		handlers = new ArrayList<EventHandler>();
 		lines = 0;
 		heap = h;
 		initialiseHandlers();
 
 	}
-	public ETParser(InputStream input,Heap h,WayToDealWithErrors preaccess,WayToDealWithErrors postaccess) {
-		this.input=input;
+
+	public ETParser(InputStream input, Heap h, WayToDealWithErrors preaccess,
+			WayToDealWithErrors postaccess) {
+		this.input = input;
 		handlers = new ArrayList<EventHandler>();
 		lines = 0;
 		heap = h;
@@ -68,30 +70,32 @@ public class ETParser {
 
 	}
 
+	public void addStatsLogger() {
+		stats = new StatisticsLogger();
+	}
 
 	/**
 	 * 
-	 *            For each line of the scanner create an event and notify the
-	 *            handlers for it.
+	 * For each line of the scanner create an event and notify the handlers for
+	 * it.
 	 */
 
 	public void processFile() {
 		Scanner scanner = new Scanner(input);
-		EventFactory factory = new EventFactory();
 		while (scanner.hasNextLine()) {
 
 			String nextLine = scanner.nextLine();
-			System.out.println(nextLine + " next line");
+//			System.out.println(nextLine);
 			lines++;
-			Event event = factory.createEvent(nextLine);
+			Event event = new Event(nextLine);
 			notifyHandlers(event);
 
 		}
 		scanner.close();
 
 	}
-	
-	public static Heap getTheHeap(){
+
+	public static Heap getTheHeap() {
 		return heap;
 	}
 
@@ -104,6 +108,7 @@ public class ETParser {
 
 	/**
 	 * A method that notifies all event handlers of the occurrence of an event.
+	 * 
 	 * @param e
 	 *            : a new event read by the parser When an event occurs all
 	 *            handlers are notified of it
@@ -152,19 +157,20 @@ public class ETParser {
 		registerHandler(multiple);
 		EventHandler dead = new CountDead();
 		registerHandler(dead);
-		EventHandler logger = new ErrorLogger();
-		registerHandler(logger);
-//		EventHandler livesize = new LiveSize(chartVisible,heuristic);
-//		registerHandler(livesize);
-		
 
 	}
+
 	/**
 	 * Getter method for the registered handlers.
+	 * 
 	 * @return the list of currently registered handlers
 	 */
-	public List<EventHandler> getHandlers(){
+	public List<EventHandler> getHandlers() {
 		return handlers;
+	}
+
+	public static StatisticsLogger getLogger() {
+		return stats;
 	}
 
 }

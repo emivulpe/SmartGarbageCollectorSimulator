@@ -11,7 +11,6 @@ import org.jfree.ui.ApplicationFrame;
 import uk.ac.glasgow.etparser.ObjectClass;
 import uk.ac.glasgow.etparser.CommandParser.WayToDealWithErrors;
 import uk.ac.glasgow.etparser.ObjectLiveTime;
-import uk.ac.glasgow.etparser.events.CreationEvent;
 import uk.ac.glasgow.etparser.events.Event;
 import uk.ac.glasgow.etparser.events.Event.Check;
 import uk.ac.glasgow.etparser.events.Event.TypeOfEvent;
@@ -89,7 +88,6 @@ public class Heap implements EventHandler {
 	public void handle(Event e) {
 
 		timeSequence++;
-		System.out.println(timeSequence+" Time");
 		String currentObjectID = e.getObjectID();
 		TypeOfEvent currentEventType = e.getTypeOfEvent();
 		// if never seen before
@@ -100,18 +98,18 @@ public class Heap implements EventHandler {
 			everSeen.put(currentObjectID, livetime);
 
 			// if the event is allocation- great
-			if (currentEventType==TypeOfEvent.ALLOCATION) {
+			if (currentEventType == TypeOfEvent.ALLOCATION) {
 				livetime.giveBirth();
-				allocateObject((CreationEvent) e);
+				allocateObject(e);
 				chart.updateChart(timeSequence, livesize);
-				System.out.println("first allocation of " + currentObjectID);
+				// System.out.println("first allocation of " + currentObjectID);
 
 			}
 			// if the event isn't allocation
 			// report for notborn error
 			else {
-				System.out.println("not born because not allocated "
-						+ currentObjectID);
+				// System.out.println("not born because not allocated "
+				// + currentObjectID);
 				e.setCheck(Check.NOTBORN);
 			}
 			everSeen.put(currentObjectID, livetime);
@@ -124,9 +122,9 @@ public class Heap implements EventHandler {
 			if (!existsInHeap(currentObjectID)
 					&& !everSeen.get(currentObjectID).isDead()) {
 				// if the event is allocation- perfect
-				if (currentEventType==TypeOfEvent.ALLOCATION) {
+				if (currentEventType == TypeOfEvent.ALLOCATION) {
 					everSeen.get(currentObjectID).giveBirth();
-					allocateObject((CreationEvent) e);
+					allocateObject(e);
 					chart.updateChart(timeSequence, livesize);
 					System.out
 							.println("first allocation of " + currentObjectID);
@@ -134,8 +132,8 @@ public class Heap implements EventHandler {
 				}
 				// if the event isn't allocation report not born error
 				else {
-					System.out.println("not born because not allocated2 "
-							+ currentObjectID);
+					// System.out.println("not born because not allocated2 "
+					// + currentObjectID);
 					e.setCheck(Check.NOTBORN);
 
 				}
@@ -158,7 +156,7 @@ public class Heap implements EventHandler {
 				// the object died before this access
 				else if (currentObjectLivetime.isDead()) {
 					e.setCheck(Check.DEAD);
-					System.out.println("dead " + currentObjectID);
+					// System.out.println("dead " + currentObjectID);
 				}
 				// it's legal to update this object
 				else {
@@ -167,16 +165,17 @@ public class Heap implements EventHandler {
 
 					// if it was a death event kill the object in everLived,
 					// deallocate it from the heap
-					if (currentEventType==TypeOfEvent.DEATH) {
+					if (currentEventType == TypeOfEvent.DEATH) {
 
 						killObject(currentObjectID);
-						deallocate(currentObjectID);
 						chart.updateChart(timeSequence, livesize);
 
-						System.out.println("kill " + currentObjectID);
+						// System.out.println(livesize + " livesize, " +
+						// allocatedMemSize+" allocated memory");
 					} else {
 						updateObject(e);
-						System.out.println("legal access " + currentObjectID);
+						// System.out.println("legal access " +
+						// currentObjectID);
 					}
 
 				}
@@ -194,6 +193,9 @@ public class Heap implements EventHandler {
 	protected void killObject(String objectID) {
 		everSeen.get(objectID).kill();
 		livesize -= memory.get(objectID).getSize();
+		// System.out.println("kill " + objectID);
+		// System.out.println(livesize + " livesize, " +
+		// allocatedMemSize+" allocated memory"+ " in kill-heap");
 	}
 
 	protected boolean existsInHeap(String objectID) {
@@ -204,7 +206,7 @@ public class Heap implements EventHandler {
 		return everSeen.get(objectID) != null;
 	}
 
-	protected void allocateObject(CreationEvent e) {
+	protected void allocateObject(Event e) {
 		String currentObjectID = e.getObjectID();
 		int size = e.getSize();
 		livesize += size;
@@ -215,8 +217,9 @@ public class Heap implements EventHandler {
 		// ObjectEventRecord record = new ObjectEventRecord(e);
 		memory.put(currentObjectID, object);
 		e.setCheck(Check.CREATION);
-		CreationEvent ce = (CreationEvent) e;
-		timeSize += ce.getSize();
+		timeSize += size;
+		// System.out.println(livesize + " livesize, " +
+		// allocatedMemSize+" allocated memory"+ " in allocate-heap");
 
 	}
 
@@ -227,8 +230,7 @@ public class Heap implements EventHandler {
 		// ObjectEventRecord record = new ObjectEventRecord(e);
 		memory.put(currentObjectID, object);
 		e.setCheck(Check.CREATION);
-		CreationEvent ce = new CreationEvent(e);
-		timeSize += ce.getSize();
+		timeSize += e.getSize();
 
 	}
 
@@ -240,7 +242,7 @@ public class Heap implements EventHandler {
 			accessedObject.updateEvent(timeSequence, e.getTypeOfEvent());
 			memory.put(currentObjectID, accessedObject);
 			e.setCheck(Check.LEGAL);
-			if (currentEventStatus==TypeOfEvent.OTHER) {
+			if (currentEventStatus == TypeOfEvent.METHOD) {
 				timeMethod++;
 			}
 
@@ -276,7 +278,7 @@ public class Heap implements EventHandler {
 	 * @return the number of objects tried to be accessed ever.
 	 */
 	public int getNumObjects() {
-		System.out.println("number in heap " + everSeen.size());
+		// System.out.println("number in heap " + everSeen.size());
 		return everSeen.size();
 	}
 
@@ -322,6 +324,11 @@ public class Heap implements EventHandler {
 
 	public long getAllocatedMemSize() {
 		return allocatedMemSize;
+	}
+
+	public HashMap<String, ObjectLiveTime> getEverSeen() {
+		return everSeen;
+
 	}
 
 	protected void handleIgnorePreaccess() {

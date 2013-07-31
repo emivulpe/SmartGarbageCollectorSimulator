@@ -3,6 +3,7 @@ package uk.ac.glasgow.etparser.handlers.EventReporters;
 import java.util.HashSet;
 import java.util.Set;
 
+import uk.ac.glasgow.etparser.ETParser;
 import uk.ac.glasgow.etparser.events.Event;
 import uk.ac.glasgow.etparser.events.Event.Check;
 import uk.ac.glasgow.etparser.handlers.EventHandler;
@@ -49,8 +50,8 @@ public class CountNotBorn implements EventHandler, EventReport {
 	public void handle(Event e) {
 		if (e.getCheck().equals(Check.NOTBORN)) {
 			notBorn.add(e.getObjectID());
-			System.out.println("Object with id " + e.getObjectID()
-					+ " is not born yet.");
+			// System.out.println("Object with id " + e.getObjectID()
+			// + " is not born yet.");
 		}
 
 	}
@@ -61,8 +62,14 @@ public class CountNotBorn implements EventHandler, EventReport {
 	 */
 	@Override
 	public String finalReport() {
-		return (float) notBorn.size()
-				/ totalObjectsInHeap * PERCENTAGE
+
+		if (ETParser.getLogger() != null) {
+			ETParser.getLogger()
+					.getLogger()
+					.info((float) notBorn.size() / totalObjectsInHeap
+							* PERCENTAGE + " % objects cause not born error.");
+		}
+		return (float) notBorn.size() / totalObjectsInHeap * PERCENTAGE
 				+ " % objects cause not born error";
 	}
 

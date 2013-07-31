@@ -21,6 +21,7 @@ public class StatisticsLogger {
 	 */
 	public StatisticsLogger() {
 		logger = Logger.getLogger("stats");
+		System.out.println("STATS");
 	}
 
 	/**

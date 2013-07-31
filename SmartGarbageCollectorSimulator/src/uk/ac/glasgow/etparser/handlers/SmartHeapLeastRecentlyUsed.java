@@ -7,38 +7,29 @@ import java.util.HashMap;
 import java.util.List;
 import uk.ac.glasgow.etparser.ObjectClass;
 
-
 public class SmartHeapLeastRecentlyUsed extends SmartHeap {
-	public SmartHeapLeastRecentlyUsed(){
+	public SmartHeapLeastRecentlyUsed() {
+		super();
 		System.out.println("You created a new LRUHeap");
 	}
 
-
-
-
 	protected void deallocate() {
-		//create a list of objects ordered by the time of last access
+		// create a list of objects ordered by the time of last access
 		List<ObjectClass> timeOrderedObjects = getListOfObjectClassTimeSorted();
-		while (checkSizeLimitExcess() && (!sizeNormal())) {
-			
-			//take the least recently used object and remove it from the list
-		    String currentObjectID = timeOrderedObjects.remove(0).getID();
-		    //get the size of least recently used object and
-		    //remove the object from the heap
-			int sizeOfObject = memory.remove(currentObjectID).getSize();
-			livesize-=sizeOfObject;
-			//decrease the allocated memory size
-			allocatedMemSize -= sizeOfObject;
-			everSeen.get(currentObjectID).kill();
-			System.out.println("Deallocate "+currentObjectID);
+		while (!sizeNormal()) {
+
+			// take the least recently used object and remove it from the list
+			String currentObjectID = timeOrderedObjects.remove(0).getID();
+
+			// kill that object in the ever seen so
+			// it would be treated as a dead object from now on
+			killObject(currentObjectID);
+
+			// System.out.println("Deallocate "+currentObjectID);
 		}
-		System.out.println("least");
+		// System.out.println("least");
 
 	}
-
-
-
-
 
 	/**
 	 * Method the takes all objects from the heap and orders them into a list of
@@ -66,7 +57,5 @@ public class SmartHeapLeastRecentlyUsed extends SmartHeap {
 
 		return listOfObjects;
 	}
-	
-	
-	
+
 }
