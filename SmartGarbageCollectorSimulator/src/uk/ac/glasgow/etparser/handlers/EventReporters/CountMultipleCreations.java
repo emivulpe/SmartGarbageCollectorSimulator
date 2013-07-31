@@ -1,14 +1,14 @@
-package uk.ac.glasgow.etparser.handlers;
+package uk.ac.glasgow.etparser.handlers.EventReporters;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import uk.ac.glasgow.etparser.events.Event;
 import uk.ac.glasgow.etparser.events.Event.Check;
+import uk.ac.glasgow.etparser.handlers.EventHandler;
 
 /**
- * This class keeps track of all objects tried to be created more than
- * once.
+ * This class keeps track of all objects tried to be created more than once.
  * 
  * @author Emi
  * @version 1.0
@@ -60,7 +60,7 @@ public class CountMultipleCreations implements EventHandler, EventReport {
 	public String finalReport() {
 		// TODO Auto-generated method stub
 		return (float) multiples.size()
-				/ SimulatedHeap.getTheHeap().getNumObjects() * PERCENTAGE
+				/ totalObjectsInHeap * PERCENTAGE
 				+ " % objects were created more than once";
 	}
 

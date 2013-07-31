@@ -1,10 +1,12 @@
-package uk.ac.glasgow.etparser.handlers;
+package uk.ac.glasgow.etparser.handlers.EventReporters;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import uk.ac.glasgow.etparser.events.Event;
 import uk.ac.glasgow.etparser.events.Event.Check;
+import uk.ac.glasgow.etparser.handlers.EventHandler;
+
 
 /**
  * This class keeps track of all successfully created objects.
@@ -44,7 +46,7 @@ public class CountCreation implements EventHandler, EventReport {
 	@Override
 	public void handle(Event e) {
 
-		if (e.getCheck().equals(Check.CREATION)) {
+		if (e.getCheck()!=null&&e.getCheck().equals(Check.CREATION)) {
 			created.add(e.getObjectID());
 			System.out.println("Object with id " + e.getObjectID()
 					+ " has been created.");
@@ -59,7 +61,7 @@ public class CountCreation implements EventHandler, EventReport {
 	@Override
 	public String finalReport() {
 		return (float) created.size()
-				/ SimulatedHeap.getTheHeap().getNumObjects() * PERCENTAGE
+				/ totalObjectsInHeap * PERCENTAGE
 				+ " % objects were created successfully";
 	}
 

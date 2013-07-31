@@ -1,13 +1,20 @@
 package uk.ac.glasgow.etparser;
-
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import uk.ac.glasgow.etparser.ACommandLineParser.WayToDeal;
+import uk.ac.glasgow.etparser.CommandParser.Heuristic;
+import uk.ac.glasgow.etparser.CommandParser.WayToDealWithErrors;
 import uk.ac.glasgow.etparser.events.*;
 import uk.ac.glasgow.etparser.handlers.*;
+import uk.ac.glasgow.etparser.handlers.EventReporters.CountCreation;
+import uk.ac.glasgow.etparser.handlers.EventReporters.CountDead;
+import uk.ac.glasgow.etparser.handlers.EventReporters.CountLegal;
+import uk.ac.glasgow.etparser.handlers.EventReporters.CountMultipleCreations;
+import uk.ac.glasgow.etparser.handlers.EventReporters.CountNotBorn;
+import uk.ac.glasgow.etparser.handlers.EventReporters.EventReport;
 
 /**
  *  This class parses a file into lines, keeps a list of event
@@ -32,38 +39,35 @@ public class ETParser {
 	 * allocated and also keeps track of all the objects tried to be accessed at
 	 * any point of the program.
 	 */
-	private SimulatedHeap heap;
+	private static Heap heap;
 	
-	private boolean chartVisible;
 
 	/**
 	 * Constructor initializing the ETParser which takes an InputStream and does all its work using the information from the stream.
 	 * @param input
 	 *            : the file to be parsed
 	 */
+	
 
-	public ETParser(InputStream input) {
+	public ETParser(InputStream input, Heap h) {
 		this.input=input;
 		handlers = new ArrayList<EventHandler>();
 		lines = 0;
-		heap = SimulatedHeap.getTheHeap();
+		heap = h;
 		initialiseHandlers();
 
 	}
-	public ETParser(InputStream input,WayToDeal preaccess,WayToDeal postaccess, boolean chart) {
+	public ETParser(InputStream input,Heap h,WayToDealWithErrors preaccess,WayToDealWithErrors postaccess) {
 		this.input=input;
 		handlers = new ArrayList<EventHandler>();
 		lines = 0;
-		heap = SimulatedHeap.getTheHeap();
-		initialiseHandlers();
+		heap = h;
 		heap.setDealWithPostaccess(postaccess);
 		heap.setDealWithPreaccess(preaccess);
-		System.out.println(chart+"chaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaart in etparser");
-		chartVisible=chart;
 		initialiseHandlers();
-		System.out.println(chartVisible+"chaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaart in etpaser2");
 
 	}
+
 
 	/**
 	 * 
@@ -85,6 +89,10 @@ public class ETParser {
 		}
 		scanner.close();
 
+	}
+	
+	public static Heap getTheHeap(){
+		return heap;
 	}
 
 	/**
@@ -134,21 +142,21 @@ public class ETParser {
 	 */
 	public void initialiseHandlers() {
 		registerHandler(heap);
+		EventHandler notBorns = new CountNotBorn();
+		registerHandler(notBorns);
 		EventHandler creation = new CountCreation();
 		registerHandler(creation);
 		EventHandler legal = new CountLegal();
 		registerHandler(legal);
-		EventHandler dead = new CountDead();
-		registerHandler(dead);
 		EventHandler multiple = new CountMultipleCreations();
 		registerHandler(multiple);
-		EventHandler notBorns = new CountNotBorn();
-		registerHandler(notBorns);
+		EventHandler dead = new CountDead();
+		registerHandler(dead);
 		EventHandler logger = new ErrorLogger();
 		registerHandler(logger);
-		System.out.println(chartVisible+"chaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaart in parser");
-		EventHandler livesize = new LiveSize(chartVisible);
-		registerHandler(livesize);
+//		EventHandler livesize = new LiveSize(chartVisible,heuristic);
+//		registerHandler(livesize);
+		
 
 	}
 	/**

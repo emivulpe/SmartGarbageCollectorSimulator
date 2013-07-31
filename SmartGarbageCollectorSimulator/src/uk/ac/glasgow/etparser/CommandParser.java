@@ -12,114 +12,136 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import uk.ac.glasgow.etparser.handlers.Heap;
+import uk.ac.glasgow.etparser.handlers.SmartHeapFIFO;
+import uk.ac.glasgow.etparser.handlers.SmartHeapLeastRecentlyUsed;
 
-public class ACommandLineParser {
+public class CommandParser {
 
 	private static boolean interactive = false;
 	private static boolean chart = false;
 	private static boolean help = false;
-	private static LiveSizeChart lchart;
-	
-	//default would be to ignore these errors. if unborn or dead in args specify...
-	private static WayToDeal preaccess=WayToDeal.IGNORE;
-	private static WayToDeal postaccess=WayToDeal.IGNORE;
-	
+
+	// default would be to ignore these errors. if unborn or dead in args
+	// specify...
+	private static WayToDealWithErrors preaccess = WayToDealWithErrors.IGNORE;
+	private static WayToDealWithErrors postaccess = WayToDealWithErrors.IGNORE;
+
+	private static Heuristic heuristic;
+
 	private static String inputFile;
-	
-	public enum WayToDeal {IGNORE,MOVE	};
-	
-	
-	public ACommandLineParser(){
-		
+
+	private static Heap heap; //default if to run the normal heap.
+								  //If the user chose a heuristic-change it.
+	public enum WayToDealWithErrors {
+		IGNORE, MOVE
+	};
+
+	public enum Heuristic {
+		FIRST, LEASTRECENTLYUSED
+	};
+
+	public CommandParser() {
+
 	}
-	
-	
+
 	public static void main(String args[]) {
-		
+
 		Options options = new Options();
-		
+
 		// First parameter is the option name
 		// Second parameter is whether this is a switch or argument
 		// Third is a description
 		options.addOption("i", false, "run the program interactively");
 		options.addOption("ch", false, "display a livechart");
 		options.addOption("r", true, "number of times to repeat the run");
-		options.addOption("f",true,"input file name");
-		options.addOption("unborn",true,"how to deal with unborn accesses: ignore or move");
-		options.addOption("dead",true,"how to deal with dead accesses");
-		options.addOption("h",false,"ask for help");
-		
+		options.addOption("f", true, "input file name");
+		options.addOption("unborn", true,
+				"how to deal with unborn accesses: ignore or move");
+		options.addOption("dead", true, "how to deal with dead accesses");
+		options.addOption("h", false, "ask for help");
+		options.addOption("heuristic", true,
+				"choose a heuristic for deleting objects");
+
 		// Parse the arguments
 		CommandLineParser parser = new BasicParser();
 		CommandLine cmd = null;
 		try {
-			cmd = parser.parse( options, args);
+			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
 			System.err.println("Error parsing commandline options.");
 			System.err.println(e);
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		
+
 		int reps = 1;
 		if (cmd.hasOption("r")) {
 			reps = Integer.parseInt(cmd.getOptionValue("r"));
 		}
-		
-		if(cmd.hasOption("unborn")){
-			preaccess=enumConverter(cmd.getOptionValue("unborn"));	
+
+		if (cmd.hasOption("unborn")) {
+			preaccess = wayToDealEnumConverter(cmd.getOptionValue("unborn"));
 		}
-		
-		if(cmd.hasOption("dead")){
-			postaccess=enumConverter(cmd.getOptionValue("dead"));
+
+		if (cmd.hasOption("dead")) {
+			postaccess = wayToDealEnumConverter(cmd.getOptionValue("dead"));
 		}
-		
-		if(cmd.hasOption("f"))
-			inputFile=cmd.getOptionValue("f");
-		
+		/**
+		 * TODO
+		 */
+		if (cmd.hasOption("heuristic")) {
+			heuristic = heuristicEnumConverter(cmd.getOptionValue("heuristic"));
+			switch(heuristic){
+			case FIRST: heap=new SmartHeapFIFO(); break;
+			case LEASTRECENTLYUSED: heap=new SmartHeapLeastRecentlyUsed();break;
+			}
+		}
+		if (!cmd.hasOption("heuristic")){
+			heap=new Heap();
+		}
+
+		if (cmd.hasOption("f"))
+			inputFile = cmd.getOptionValue("f");
+
 		// Now we can interrogate them
 		interactive = cmd.hasOption("i");
 		chart = cmd.hasOption("ch");
-		help=cmd.hasOption("h");
-//		System.out.println(chart+"chaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaart");
+		help = cmd.hasOption("h");
+
 		// Want at least time or date
 		if (help) {
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp( "CommandlineParser", options );
+			formatter.printHelp("CommandlineParser", options);
 			System.exit(0);
-			
+
 		}
-		if (!cmd.hasOption("f")){
+		if (!cmd.hasOption("f")) {
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp( "CommandlineParser", options );
+			formatter.printHelp("CommandlineParser", options);
 			System.out.println("Please enter a filename to process");
-			
+
 		}
-		
-		
-		
-		for (int i=0; i<reps;i++) {
-			if (interactive){
-			//	System.out.println(tf.format(new Date()));
+
+		for (int i = 0; i < reps; i++) {
+			if (interactive) {
+				// System.out.println(tf.format(new Date()));
 				displayChoices();
 				askForPreaccess();
 				askForPostaccess();
-				}
-//				
-//			if (chart)
-//				lchart=new LiveSizeChart();
-//				if(lchart!=null) lchart.setVisible(true);
-		}
-		
-		
+			}
 
-//		ErrorLogger logger = new ErrorLogger();
+		}
+		if(chart){
+			Heap.createChart();
+		}
+
+		// ErrorLogger logger = new ErrorLogger();
 		long startOfProcess = System.currentTimeMillis();
 		try {
 			InputStream fileStream = new FileInputStream(inputFile);
-			//InputStream gzipStream = new GZIPInputStream(fileStream);
-			System.out.println(chart+"chaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaart");
-			ETParser etparser = new ETParser(fileStream,preaccess,postaccess,chart);
+			// InputStream gzipStream = new GZIPInputStream(fileStream);
+			ETParser etparser = new ETParser(fileStream,heap, preaccess, postaccess);
 			etparser.processFile();
 			etparser.printReport();
 			fileStream.close();
@@ -136,15 +158,9 @@ public class ACommandLineParser {
 			System.out.println("IOException" + io);
 			System.exit(0);
 		}
-		
-		
-		
+
 	}
-			
-			//	System.out.println(df.format(new Date()));
-		
-		
-	
+
 
 	private static void displayChoices() {
 
@@ -170,7 +186,7 @@ public class ACommandLineParser {
 		}
 
 		System.out.println();
-		preaccess = enumConverter(preAccess);
+		preaccess = wayToDealEnumConverter(preAccess);
 	}
 
 	private static void askForPostaccess() {
@@ -188,18 +204,26 @@ public class ACommandLineParser {
 			System.out.println("Please enter a valid option");
 			postAccess = scanner.next();
 		}
-		postaccess = enumConverter(postAccess);
+		postaccess = wayToDealEnumConverter(postAccess);
 	}
-	
-	public static WayToDeal enumConverter(String s){
-		if(s.equalsIgnoreCase("IGNORE")||s.equalsIgnoreCase("i")){
-			return WayToDeal.IGNORE;
-		}
-		else if (s.equalsIgnoreCase("MOVE")||s.equalsIgnoreCase("m")){
-			return WayToDeal.MOVE;
+
+	public static WayToDealWithErrors wayToDealEnumConverter(String s) {
+		if (s.equalsIgnoreCase("IGNORE") || s.equalsIgnoreCase("i")) {
+			return WayToDealWithErrors.IGNORE;
+		} else if (s.equalsIgnoreCase("MOVE") || s.equalsIgnoreCase("m")) {
+			return WayToDealWithErrors.MOVE;
 		}
 		return null;
 	}
 
-	
+	public static Heuristic heuristicEnumConverter(String s) {
+		if (s.equalsIgnoreCase("first") || s.equalsIgnoreCase("f")) {
+			return Heuristic.FIRST;
+		} else if (s.equalsIgnoreCase("least") || s.equalsIgnoreCase("l")) {
+			return Heuristic.LEASTRECENTLYUSED;
+		}
+		return null;
+
+	}
+
 }

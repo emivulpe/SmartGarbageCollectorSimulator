@@ -1,10 +1,11 @@
-package uk.ac.glasgow.etparser.handlers;
+package uk.ac.glasgow.etparser.handlers.EventReporters;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import uk.ac.glasgow.etparser.events.Event;
 import uk.ac.glasgow.etparser.events.Event.Check;
+import uk.ac.glasgow.etparser.handlers.EventHandler;
 
 /**
  * This class keeps track of all objects tried to be accessed before they were
@@ -61,7 +62,7 @@ public class CountNotBorn implements EventHandler, EventReport {
 	@Override
 	public String finalReport() {
 		return (float) notBorn.size()
-				/ SimulatedHeap.getTheHeap().getNumObjects() * PERCENTAGE
+				/ totalObjectsInHeap * PERCENTAGE
 				+ " % objects cause not born error";
 	}
 

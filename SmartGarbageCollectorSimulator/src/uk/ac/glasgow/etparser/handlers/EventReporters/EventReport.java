@@ -1,4 +1,7 @@
-package uk.ac.glasgow.etparser.handlers;
+package uk.ac.glasgow.etparser.handlers.EventReporters;
+
+import uk.ac.glasgow.etparser.ETParser;
+import uk.ac.glasgow.etparser.handlers.Heap;
 
 /**
  * All classes which produce a final report must implement that interface.
@@ -7,10 +10,14 @@ package uk.ac.glasgow.etparser.handlers;
  * 
  */
 public interface EventReport {
+	
+	
 	/**
 	 * Used for calculating the result as a percentage.
 	 */
 	public static final int PERCENTAGE = 100;
+	
+	public int totalObjectsInHeap=ETParser.getTheHeap().getNumObjects();
 
 	/**
 	 * 

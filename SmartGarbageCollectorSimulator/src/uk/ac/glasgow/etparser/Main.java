@@ -5,17 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
+import uk.ac.glasgow.etparser.handlers.Heap;
 
 public class Main {
 
 	public static void main(final String[] args) {
 
-//		ErrorLogger logger = new ErrorLogger();
 		long startOfProcess = System.currentTimeMillis();
 		try {
 			InputStream fileStream = new FileInputStream(args[0]);
-			//InputStream gzipStream = new GZIPInputStream(fileStream);
-			ETParser etparser = new ETParser(fileStream);
+//			InputStream gzipStream = new GZIPInputStream(fileStream);
+			ETParser etparser = new ETParser(fileStream,new Heap());
 			etparser.processFile();
 			etparser.printReport();
 			fileStream.close();

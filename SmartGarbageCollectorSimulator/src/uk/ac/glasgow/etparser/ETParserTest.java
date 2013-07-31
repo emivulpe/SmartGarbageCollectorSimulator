@@ -3,37 +3,40 @@ package uk.ac.glasgow.etparser;
 import static org.junit.Assert.*;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import org.junit.Before;
+import java.util.Scanner;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.ac.glasgow.etparser.events.CreationEvent;
 import uk.ac.glasgow.etparser.handlers.EventHandler;
-import uk.ac.glasgow.etparser.handlers.EventReport;
-import uk.ac.glasgow.etparser.handlers.SimulatedHeap;
+import uk.ac.glasgow.etparser.handlers.EventReporters.EventReport;
+import uk.ac.glasgow.etparser.handlers.Heap;
 
 public class ETParserTest {
 
-	private ETParser parser;
-	private InputStream is;
+	private static ETParser parser;
+	private static InputStream is;
 
-	@Before
-	public void setUp() throws Exception {
-		is = new FileInputStream("C:/Users/Emi/Desktop/traces/beforeborn.txt");
-		parser = new ETParser(is);
+	@BeforeClass
+	public static void setUp() throws Exception {
+		System.out.println("file: ");
+		String f=new Scanner(System.in).nextLine();
+		is = new FileInputStream(f);
+		parser = new ETParser(is,new Heap());
 	}
 
 	@Test
 	public void testConstructor() {
-		ETParser et = new ETParser(is);
+		ETParser et = new ETParser(is,new Heap());
 		assertEquals(0, et.getLines());
 		assertTrue(et.getHandlers() != null);
-		assertTrue(SimulatedHeap.getTheHeap() != null);
+		assertTrue(ETParser.getTheHeap() != null);
 
 	}
 
 	@Test
 	public void testProcessFile() {
 		parser.processFile();
-		assertEquals(5, parser.getLines());
+		assertEquals(13, parser.getLines());
 	}
 
 	@Test
@@ -44,12 +47,12 @@ public class ETParserTest {
 	@Test
 	public void testRegister() {
 		parser.registerHandler(new EventHandlerTester());
-		assertEquals(parser.getHandlers().size(), 9);
+		assertEquals(parser.getHandlers().size(),8);
 	}
 
 	@Test
 	public void testNotifyHandlers() {
-		CreationEvent e = new CreationEvent("s wt hye4 10a");
+		CreationEvent e = new CreationEvent("s wt 44 10a");
 		EventHandlerTester tester = new EventHandlerTester();
 		parser.registerHandler(tester);
 		parser.notifyHandlers(e);
@@ -96,4 +99,3 @@ public class ETParserTest {
 	}
 
 }
-

@@ -15,10 +15,7 @@ public interface EventHandler {
 	 * @param e
 	 *            event to be handled
 	 */
-	
-	
-	public void handle(Event e);
 
-	
+	public void handle(Event e);
 
 }
