@@ -38,6 +38,7 @@ public class Event {
 			objectId = scanner.next();
 			break;
 		case METHOD:
+			case UPDATE:
 			scanner.next();
 			objectId = scanner.next();
 			break;

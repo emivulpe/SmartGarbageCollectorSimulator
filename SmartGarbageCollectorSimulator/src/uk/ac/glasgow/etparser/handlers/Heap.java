@@ -1,13 +1,7 @@
 package uk.ac.glasgow.etparser.handlers;
 
 import java.util.HashMap;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.ApplicationFrame;
+import uk.ac.glasgow.etparser.LiveSizeChart;
 import uk.ac.glasgow.etparser.ObjectClass;
 import uk.ac.glasgow.etparser.CommandParser.WayToDealWithErrors;
 import uk.ac.glasgow.etparser.ObjectLiveTime;
@@ -40,9 +34,11 @@ public class Heap implements EventHandler {
 
 	protected int livesize, allocatedMemSize;
 
-	protected static LiveSizeChart chart;
+	protected LiveSizeChart chart;
 
 	protected WayToDealWithErrors dealWithPreaccess, dealWithPostAccess;
+	
+	protected int EVENTSINTERVAL = 10000;
 
 	/**
 	 * Initializes the class variables. Private because of Singleton design
@@ -72,9 +68,14 @@ public class Heap implements EventHandler {
 
 	}
 
-	public static void createChart() {
+	public void createChart() {
 		chart.setVisible(true);
 
+	}
+	
+	public void specifyWhenToUpdateTheChart(int i){
+		EVENTSINTERVAL=i;
+		System.out.println(EVENTSINTERVAL+ " interval");
 	}
 
 	/**
@@ -108,8 +109,8 @@ public class Heap implements EventHandler {
 			// if the event isn't allocation
 			// report for notborn error
 			else {
-				// System.out.println("not born because not allocated "
-				// + currentObjectID);
+//				 System.out.println("not born because not allocated "
+//				 + currentObjectID);
 				e.setCheck(Check.NOTBORN);
 			}
 			everSeen.put(currentObjectID, livetime);
@@ -126,14 +127,14 @@ public class Heap implements EventHandler {
 					everSeen.get(currentObjectID).giveBirth();
 					allocateObject(e);
 					chart.updateChart(timeSequence, livesize);
-					System.out
-							.println("first allocation of " + currentObjectID);
+//					System.out
+//							.println("first allocation of " + currentObjectID);
 
 				}
 				// if the event isn't allocation report not born error
 				else {
-					// System.out.println("not born because not allocated2 "
-					// + currentObjectID);
+//					 System.out.println("not born because not allocated2 "
+//					 + currentObjectID);
 					e.setCheck(Check.NOTBORN);
 
 				}
@@ -148,15 +149,15 @@ public class Heap implements EventHandler {
 				// if it was never born, probably preaccess before and now again
 				// or probably dead
 				if (!currentObjectLivetime.isBorn()) {
-					System.out
-							.println("not live but exists- either preaccess or it was dead "
-									+ currentObjectID);
+//					System.out
+//							.println("not live but exists- either preaccess or it was dead "
+//									+ currentObjectID);
 					e.setCheck(Check.NOTBORN);
 				}
 				// the object died before this access
 				else if (currentObjectLivetime.isDead()) {
 					e.setCheck(Check.DEAD);
-					// System.out.println("dead " + currentObjectID);
+//					 System.out.println("dead " + currentObjectID);
 				}
 				// it's legal to update this object
 				else {
@@ -164,18 +165,17 @@ public class Heap implements EventHandler {
 					e.setCheck(Check.LEGAL);
 
 					// if it was a death event kill the object in everLived,
-					// deallocate it from the heap
 					if (currentEventType == TypeOfEvent.DEATH) {
 
 						killObject(currentObjectID);
 						chart.updateChart(timeSequence, livesize);
 
-						// System.out.println(livesize + " livesize, " +
-						// allocatedMemSize+" allocated memory");
+//						 System.out.println(livesize + " livesize, " +
+//						 allocatedMemSize+" allocated memory");
 					} else {
 						updateObject(e);
-						// System.out.println("legal access " +
-						// currentObjectID);
+//						 System.out.println("legal access " +
+//						 currentObjectID);
 					}
 
 				}
@@ -183,6 +183,8 @@ public class Heap implements EventHandler {
 			}
 
 		}
+		if(timeSequence%EVENTSINTERVAL==0)
+		chart.updateChart(timeSequence, livesize);
 	}
 
 	protected void deallocate(String objectID) {
@@ -367,43 +369,6 @@ public class Heap implements EventHandler {
 		return memory;
 	}
 
-	public class LiveSizeChart extends ApplicationFrame {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		private XYSeries data;
 
-		public LiveSizeChart() {
-
-			super("Live size chart");
-
-			data = new XYSeries("Data");
-			data.add(0, 0);
-
-			XYSeriesCollection dataset = new XYSeriesCollection(data);
-
-			// based on the dataset we create the chart
-			JFreeChart chart = ChartFactory.createXYLineChart(
-					"Livesize change over time", "Time", "Livesize", dataset,
-					PlotOrientation.VERTICAL, false, false, false);
-
-			// we put the chart into a panel
-			ChartPanel chartPanel = new ChartPanel(chart);
-
-			// default size
-			chartPanel.setPreferredSize(new java.awt.Dimension(800, 600));
-
-			// add it to our application
-			setContentPane(chartPanel);
-			pack();
-
-		}
-
-		public void updateChart(double x, double y) {
-			data.add(x, y);
-		}
-
-	}
 
 }

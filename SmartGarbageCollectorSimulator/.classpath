@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="dep/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Emi/Desktop/jfreechart/jfreechart-1.0.15/jfreechart-1.0.15-demo.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Emi/Desktop/command line parser/commons-cli-1.2/commons-cli-1.2.jar"/>
+	<classpathentry kind="lib" path="dep/jcommon-1.0.18.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

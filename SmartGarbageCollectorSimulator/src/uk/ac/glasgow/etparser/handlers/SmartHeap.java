@@ -8,19 +8,40 @@ import uk.ac.glasgow.etparser.events.Event.Check;
 import uk.ac.glasgow.etparser.events.Event.TypeOfEvent;
 
 public abstract class SmartHeap extends Heap {
+
+	private int threshold; // default would be 70000 for now unless
+									// otherwise specified
+
+	private double percentageToDeallocate; // default would be 20% if not
+													// otherwise specified
+
 	protected Queue<String> allocatedObjects;
 
 	public SmartHeap() {
 		super();
 		allocatedObjects = new LinkedList<String>();
+		threshold = 30;
+		percentageToDeallocate = 0.2;
+
+	}
+
+	public void specifyThreshold(int t) {
+		threshold = t;
+		System.out.println("threshold is" + threshold);
+
+	}
+
+	public void specifyPercentageToDeallocate(int p) {
+		percentageToDeallocate = p / 100.0;
+		System.out.println("percentage is" + percentageToDeallocate);
 	}
 
 	protected boolean checkSizeLimitExcess() {
-		return livesize >= 30;
+		return livesize >= threshold;
 	}
 
 	protected boolean sizeNormal() {
-		return livesize < 27 && livesize >= 0;
+		return livesize < percentageToDeallocate * threshold && livesize >= 0;
 	}
 
 	// the same handle method as in Heap, no deallocations this time
@@ -40,19 +61,21 @@ public abstract class SmartHeap extends Heap {
 				livetime.giveBirth();
 				allocateObject(e);
 				allocatedObjects.add(currentObjectID);
-				// System.out.println("first allocation of " + currentObjectID);
-				// check for memory excess
+				chart.updateChart(timeSequence, livesize);
+//				 System.out.println("first allocation of " + currentObjectID);
+				 //check for memory excess
 				if (checkSizeLimitExcess()) {
 					deallocate();
 
 				}
+				chart.updateChart(timeSequence, livesize);
 
 			}
 			// if the event isn't allocation
 			// report for notborn error
 			else {
-				// System.out.println("not born because not allocated "
-				// + currentObjectID);
+//				 System.out.println("not born because not allocated "
+//				 + currentObjectID);
 				e.setCheck(Check.NOTBORN);
 			}
 			everSeen.put(currentObjectID, livetime);
@@ -69,19 +92,24 @@ public abstract class SmartHeap extends Heap {
 					everSeen.get(currentObjectID).giveBirth();
 					allocateObject(e);
 					allocatedObjects.add(currentObjectID);
-					System.out
-							.println("first allocation of " + currentObjectID);
+//					System.out
+//							.println("first allocation of " + currentObjectID);
+					chart.updateChart(timeSequence, livesize);
 					// check for memory excess
 					if (checkSizeLimitExcess()) {
 						deallocate();
+						
+						
 
 					}
+					chart.updateChart(timeSequence, livesize);
+					
 
 				}
 				// if the event isn't allocation report not born error
 				else {
-					// System.out.println("not born because not allocated2 "
-					// + currentObjectID);
+//					 System.out.println("not born because not allocated2 "
+//					 + currentObjectID);
 					e.setCheck(Check.NOTBORN);
 
 				}
@@ -96,15 +124,15 @@ public abstract class SmartHeap extends Heap {
 				// if it was never born, probably preaccess before and now again
 				// or probably dead
 				if (!currentObjectLivetime.isBorn()) {
-					System.out
-							.println("not live but exists- either preaccess or it was dead "
-									+ currentObjectID);
+//					System.out
+//							.println("not live but exists- either preaccess or it was dead "
+//									+ currentObjectID);
 					e.setCheck(Check.NOTBORN);
 				}
 				// the object died before this access
 				else if (currentObjectLivetime.isDead()) {
 					e.setCheck(Check.DEAD);
-					// System.out.println("dead " + currentObjectID);
+//					 System.out.println("dead " + currentObjectID);
 				}
 				// it's legal to update this object
 				else {
@@ -117,12 +145,12 @@ public abstract class SmartHeap extends Heap {
 
 						killObject(currentObjectID);
 						chart.updateChart(timeSequence, livesize);
-						// System.out.println(livesize + " livesize, " +
-						// allocatedMemSize+" allocated memory");
+//						 System.out.println(livesize + " livesize, " +
+//						 allocatedMemSize+" allocated memory");
 					} else {
 						updateObject(e);
-						// System.out.println("legal access " +
-						// currentObjectID);
+//						 System.out.println("legal access " +
+//						 currentObjectID);
 					}
 
 				}
@@ -130,7 +158,8 @@ public abstract class SmartHeap extends Heap {
 			}
 
 		}
-		chart.updateChart(timeSequence, livesize);
+		if (timeSequence % EVENTSINTERVAL == 0)
+			chart.updateChart(timeSequence, livesize);
 	}
 
 	// must be overridden by subclasses

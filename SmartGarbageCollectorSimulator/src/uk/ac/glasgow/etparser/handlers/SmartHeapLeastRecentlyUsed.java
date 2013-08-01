@@ -16,7 +16,7 @@ public class SmartHeapLeastRecentlyUsed extends SmartHeap {
 	protected void deallocate() {
 		// create a list of objects ordered by the time of last access
 		List<ObjectClass> timeOrderedObjects = getListOfObjectClassTimeSorted();
-		while (!sizeNormal()) {
+		while (!sizeNormal()&&timeOrderedObjects.size()>0) {
 
 			// take the least recently used object and remove it from the list
 			String currentObjectID = timeOrderedObjects.remove(0).getID();
@@ -49,8 +49,8 @@ public class SmartHeapLeastRecentlyUsed extends SmartHeap {
 
 		Collections.sort(listOfObjects, new Comparator<ObjectClass>() {
 			public int compare(ObjectClass o1, ObjectClass o2) {
-				return Integer.compare(o1.getTimeOfLastEvent(),
-						o2.getTimeOfLastEvent());
+				return Integer.compare(o2.getTimeOfLastEvent(),
+						o1.getTimeOfLastEvent());
 
 			}
 		});

@@ -16,6 +16,7 @@ import org.apache.commons.cli.ParseException;
 import uk.ac.glasgow.etparser.handlers.ErrorLogger;
 import uk.ac.glasgow.etparser.handlers.EventHandler;
 import uk.ac.glasgow.etparser.handlers.Heap;
+import uk.ac.glasgow.etparser.handlers.SmartHeap;
 import uk.ac.glasgow.etparser.handlers.SmartHeapFIFO;
 import uk.ac.glasgow.etparser.handlers.SmartHeapLeastRecentlyUsed;
 
@@ -38,6 +39,8 @@ public class CommandParser {
 
 	private static Heap heap; // default if to run the normal heap.
 								// If the user chose a heuristic-change it.
+	
+	private static InputStream fileStream;
 
 	public enum WayToDealWithErrors {
 		IGNORE, MOVE
@@ -62,6 +65,7 @@ public class CommandParser {
 		options.addOption("ch", false, "display a livechart");
 		options.addOption("r", true, "number of times to repeat the run");
 		options.addOption("f", true, "input file name");
+		options.addOption("gz", true, "input gz file");
 		options.addOption("unborn", true,
 				"how to deal with unborn accesses: ignore or move");
 		options.addOption("dead", true, "how to deal with dead accesses");
@@ -72,6 +76,9 @@ public class CommandParser {
 				"do you want an error logger to show errors?");
 		options.addOption("sl", false,
 				"do you want an statistics logger to record the statistics?");
+		options.addOption("t", true, "enter the threshold");
+		options.addOption("p", true, "enter the percentage you want to deallocate");
+		options.addOption("ei", true, "specify the event interval at which to update the chart");
 
 		// Parse the arguments
 		CommandLineParser parser = new BasicParser();
@@ -112,13 +119,20 @@ public class CommandParser {
 				heap = new SmartHeapLeastRecentlyUsed();
 				break;
 			}
+			if(cmd.hasOption("t")){
+			
+				((SmartHeap) heap).specifyThreshold(Integer.parseInt(cmd.getOptionValue("t")));
+			}
+			if (cmd.hasOption("p")){
+				((SmartHeap) heap).specifyPercentageToDeallocate(Integer.parseInt(cmd.getOptionValue("p")));
+			}
 		}
 		if (!cmd.hasOption("heuristic")) {
 			heap = new Heap();
 		}
 
-		if (cmd.hasOption("f"))
-			inputFile = cmd.getOptionValue("f");
+			
+		
 
 		// Now we can interrogate them
 		interactive = cmd.hasOption("i");
@@ -133,12 +147,13 @@ public class CommandParser {
 			System.exit(0);
 
 		}
-		if (!cmd.hasOption("f")) {
+		if (!cmd.hasOption("f")&&(!cmd.hasOption("gz"))) {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("CommandlineParser", options);
 			System.out.println("Please enter a filename to process");
 
 		}
+		
 
 		for (int i = 0; i < reps; i++) {
 			if (interactive) {
@@ -150,14 +165,27 @@ public class CommandParser {
 
 		}
 		if (chart) {
-			Heap.createChart();
+			heap.createChart();
+			if(cmd.hasOption("ei")){
+				heap.specifyWhenToUpdateTheChart(Integer.parseInt(cmd.getOptionValue("ei")));
+				
+			}
 		}
 
 		long startOfProcess = System.currentTimeMillis();
 		try {
-			InputStream fileStream = new FileInputStream(inputFile);
-			InputStream gzipStream = new GZIPInputStream(fileStream);
-			ETParser etparser = new ETParser(gzipStream, heap, preaccess,
+
+			if (cmd.hasOption("f")){
+				inputFile = cmd.getOptionValue("f");
+				 fileStream= new FileInputStream(inputFile);
+			}
+			
+			if(cmd.hasOption("gz")){
+				inputFile = cmd.getOptionValue("gz");
+				fileStream=new GZIPInputStream(new FileInputStream(inputFile));
+			}
+			
+			ETParser etparser = new ETParser(fileStream, heap, preaccess,
 					postaccess);
 			if (errorLogger != null) {
 				etparser.registerHandler(errorLogger);
@@ -209,6 +237,7 @@ public class CommandParser {
 			System.out.println("Please enter a valid option");
 			preAccess = scanner.next();
 		}
+		scanner.close();
 
 		System.out.println();
 		preaccess = wayToDealEnumConverter(preAccess);
@@ -230,6 +259,7 @@ public class CommandParser {
 			postAccess = scanner.next();
 		}
 		postaccess = wayToDealEnumConverter(postAccess);
+		scanner.close();
 	}
 
 	public static WayToDealWithErrors wayToDealEnumConverter(String s) {

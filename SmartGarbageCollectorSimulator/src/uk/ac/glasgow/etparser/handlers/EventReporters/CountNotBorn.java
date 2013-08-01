@@ -62,7 +62,6 @@ public class CountNotBorn implements EventHandler, EventReport {
 	 */
 	@Override
 	public String finalReport() {
-
 		if (ETParser.getLogger() != null) {
 			ETParser.getLogger()
 					.getLogger()
