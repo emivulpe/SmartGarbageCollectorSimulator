@@ -20,12 +20,12 @@ public class SmartHeapLeastRecentlyUsed extends SmartHeap {
 
 			// take the least recently used object and remove it from the list
 			String currentObjectID = timeOrderedObjects.remove(0).getID();
-
+			
 			// kill that object in the ever seen so
 			// it would be treated as a dead object from now on
 			killObject(currentObjectID);
 
-			// System.out.println("Deallocate "+currentObjectID);
+//			 System.out.println("Deallocate "+currentObjectID);
 		}
 		// System.out.println("least");
 
@@ -48,7 +48,7 @@ public class SmartHeapLeastRecentlyUsed extends SmartHeap {
 		}
 
 		Collections.sort(listOfObjects, new Comparator<ObjectClass>() {
-			public int compare(ObjectClass o1, ObjectClass o2) {
+			public int compare(ObjectClass o2, ObjectClass o1) {
 				return Integer.compare(o2.getTimeOfLastEvent(),
 						o1.getTimeOfLastEvent());
 

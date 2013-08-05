@@ -12,6 +12,7 @@ import uk.ac.glasgow.etparser.events.Event.TypeOfEvent;
 public class Heap implements EventHandler {
 
 	/**
+	 * 
 	 * Measures time sequentially (1, 2, 3...).
 	 */
 	protected int timeSequence;

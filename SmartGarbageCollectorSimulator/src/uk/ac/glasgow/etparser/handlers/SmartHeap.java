@@ -27,13 +27,13 @@ public abstract class SmartHeap extends Heap {
 
 	public void specifyThreshold(int t) {
 		threshold = t;
-		System.out.println("threshold is" + threshold);
+		System.out.println("threshold is " + threshold);
 
 	}
 
 	public void specifyPercentageToDeallocate(int p) {
 		percentageToDeallocate = p / 100.0;
-		System.out.println("percentage is" + percentageToDeallocate);
+		System.out.println("percentage is " + percentageToDeallocate);
 	}
 
 	protected boolean checkSizeLimitExcess() {
