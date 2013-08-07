@@ -16,18 +16,16 @@ public class SmartHeapLeastRecentlyUsed extends SmartHeap {
 	protected void deallocate() {
 		// create a list of objects ordered by the time of last access
 		List<ObjectClass> timeOrderedObjects = getListOfObjectClassTimeSorted();
-		while (!sizeNormal()&&timeOrderedObjects.size()>0) {
+		while (!sizeNormal() && timeOrderedObjects.size() > 0) {
 
 			// take the least recently used object and remove it from the list
 			String currentObjectID = timeOrderedObjects.remove(0).getID();
-			System.out.println(currentObjectID);
-			
 			// kill that object in the ever seen so
 			// it would be treated as a dead object from now on
 			killObject(currentObjectID);
 			deallocate(currentObjectID);
 
-//			 System.out.println("Deallocate "+currentObjectID);
+			// System.out.println("Deallocate "+currentObjectID);
 		}
 		// System.out.println("least");
 
