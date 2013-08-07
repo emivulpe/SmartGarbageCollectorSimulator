@@ -162,7 +162,7 @@ public class Heap implements EventHandler {
 				}
 				// it's legal to update this object
 				else {
-					// if the event isn't dead just make the update
+					// if the object isn't dead just make the update
 					e.setCheck(Check.LEGAL);
 
 					// if it was a death event kill the object in everLived,

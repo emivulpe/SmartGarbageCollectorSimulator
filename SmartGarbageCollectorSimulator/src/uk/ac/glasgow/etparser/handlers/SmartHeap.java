@@ -1,7 +1,7 @@
 package uk.ac.glasgow.etparser.handlers;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
 import uk.ac.glasgow.etparser.ObjectLiveTime;
 import uk.ac.glasgow.etparser.events.Event;
 import uk.ac.glasgow.etparser.events.Event.Check;
@@ -9,17 +9,17 @@ import uk.ac.glasgow.etparser.events.Event.TypeOfEvent;
 
 public abstract class SmartHeap extends Heap {
 
-	private int threshold; // default would be 70000 for now unless
+	protected int threshold; // default would be 70000 for now unless
 									// otherwise specified
 
 	private double percentageToDeallocate; // default would be 20% if not
 													// otherwise specified
 
-	protected Queue<String> allocatedObjects;
+	protected List<String> allocatedObjects;
 
 	public SmartHeap() {
 		super();
-		allocatedObjects = new LinkedList<String>();
+		allocatedObjects = new ArrayList<String>();
 		threshold = 30;
 		percentageToDeallocate = 0.2;
 
@@ -37,15 +37,14 @@ public abstract class SmartHeap extends Heap {
 	}
 
 	protected boolean checkSizeLimitExcess() {
-		return livesize >= threshold;
+		return allocatedMemSize >= threshold;
 	}
 
 	protected boolean sizeNormal() {
-		return livesize < percentageToDeallocate * threshold && livesize >= 0;
+		return allocatedMemSize < threshold-(percentageToDeallocate * threshold) && allocatedMemSize >= 0;
 	}
 
-	// the same handle method as in Heap, no deallocations this time
-	// I think there should be deallocations + the new heuristic
+
 	@Override
 	public void handle(Event e) {
 		timeSequence++;

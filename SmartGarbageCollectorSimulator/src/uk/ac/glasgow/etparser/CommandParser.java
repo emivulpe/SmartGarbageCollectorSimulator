@@ -18,7 +18,13 @@ import uk.ac.glasgow.etparser.handlers.EventHandler;
 import uk.ac.glasgow.etparser.handlers.Heap;
 import uk.ac.glasgow.etparser.handlers.SmartHeap;
 import uk.ac.glasgow.etparser.handlers.SmartHeapFIFO;
+import uk.ac.glasgow.etparser.handlers.SmartHeapGC;
+import uk.ac.glasgow.etparser.handlers.SmartHeapLIFO;
+import uk.ac.glasgow.etparser.handlers.SmartHeapLargestSize;
 import uk.ac.glasgow.etparser.handlers.SmartHeapLeastRecentlyUsed;
+import uk.ac.glasgow.etparser.handlers.SmartHeapMostRecentlyUsed;
+import uk.ac.glasgow.etparser.handlers.SmartHeapRandom;
+import uk.ac.glasgow.etparser.handlers.SmartHeapSmallestSize;
 
 public class CommandParser {
 
@@ -39,7 +45,7 @@ public class CommandParser {
 
 	private static Heap heap; // default if to run the normal heap.
 								// If the user chose a heuristic-change it.
-	
+
 	private static InputStream fileStream;
 
 	public enum WayToDealWithErrors {
@@ -47,7 +53,7 @@ public class CommandParser {
 	};
 
 	public enum Heuristic {
-		FIRST, LEASTRECENTLYUSED
+		FIRST, LEASTRECENTLYUSED, GC, LARGEST, SMALLEST, RANDOM, MOSTRECENTLYUSED, LAST
 	};
 
 	public CommandParser() {
@@ -70,15 +76,22 @@ public class CommandParser {
 				"how to deal with unborn accesses: ignore or move");
 		options.addOption("dead", true, "how to deal with dead accesses");
 		options.addOption("h", false, "ask for help");
-		options.addOption("heuristic", true,
-				"choose a heuristic for deleting objects");
+		options.addOption(
+				"heuristic",
+				true,
+				"choose a heuristic for deleting objects: 'fifo' for first in first out, " +
+				"'lifo' for last in first ot, 'lru' for least recently used," +
+				" 'mru' for most recently used, 'gc' for normal garbage collection," +
+				" 'r' for random, 'ss' for smallest size first, 'ls' for largest size first.");
 		options.addOption("el", false,
 				"do you want an error logger to show errors?");
 		options.addOption("sl", false,
 				"do you want an statistics logger to record the statistics?");
 		options.addOption("t", true, "enter the threshold");
-		options.addOption("p", true, "enter the percentage you want to deallocate");
-		options.addOption("ei", true, "specify the event interval at which to update the chart");
+		options.addOption("p", true,
+				"enter the percentage you want to deallocate");
+		options.addOption("ei", true,
+				"specify the event interval at which to update the chart");
 
 		// Parse the arguments
 		CommandLineParser parser = new BasicParser();
@@ -118,21 +131,39 @@ public class CommandParser {
 			case LEASTRECENTLYUSED:
 				heap = new SmartHeapLeastRecentlyUsed();
 				break;
+			case GC:
+				heap = new SmartHeapGC();
+				System.out.println("gc");
+				break;
+			case LAST:
+				heap = new SmartHeapLIFO();
+				break;
+			case MOSTRECENTLYUSED:
+				heap = new SmartHeapMostRecentlyUsed();
+				break;
+			case SMALLEST:
+				heap = new SmartHeapSmallestSize();
+				break;
+			case LARGEST:
+				heap = new SmartHeapLargestSize();
+				break;
+			case RANDOM:
+				heap = new SmartHeapRandom();
+				break;
 			}
-			if(cmd.hasOption("t")){
-			
-				((SmartHeap) heap).specifyThreshold(Integer.parseInt(cmd.getOptionValue("t")));
+			if (cmd.hasOption("t")) {
+
+				((SmartHeap) heap).specifyThreshold(Integer.parseInt(cmd
+						.getOptionValue("t")));
 			}
-			if (cmd.hasOption("p")){
-				((SmartHeap) heap).specifyPercentageToDeallocate(Integer.parseInt(cmd.getOptionValue("p")));
+			if (cmd.hasOption("p")) {
+				((SmartHeap) heap).specifyPercentageToDeallocate(Integer
+						.parseInt(cmd.getOptionValue("p")));
 			}
 		}
 		if (!cmd.hasOption("heuristic")) {
 			heap = new Heap();
 		}
-
-			
-		
 
 		// Now we can interrogate them
 		interactive = cmd.hasOption("i");
@@ -147,13 +178,12 @@ public class CommandParser {
 			System.exit(0);
 
 		}
-		if (!cmd.hasOption("f")&&(!cmd.hasOption("gz"))) {
+		if (!cmd.hasOption("f") && (!cmd.hasOption("gz"))) {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("CommandlineParser", options);
 			System.out.println("Please enter a filename to process");
 
 		}
-		
 
 		for (int i = 0; i < reps; i++) {
 			if (interactive) {
@@ -166,25 +196,26 @@ public class CommandParser {
 		}
 		if (chart) {
 			heap.createChart();
-			if(cmd.hasOption("ei")){
-				heap.specifyWhenToUpdateTheChart(Integer.parseInt(cmd.getOptionValue("ei")));
-				
+			if (cmd.hasOption("ei")) {
+				heap.specifyWhenToUpdateTheChart(Integer.parseInt(cmd
+						.getOptionValue("ei")));
+
 			}
 		}
 
 		long startOfProcess = System.currentTimeMillis();
 		try {
 
-			if (cmd.hasOption("f")){
+			if (cmd.hasOption("f")) {
 				inputFile = cmd.getOptionValue("f");
-				 fileStream= new FileInputStream(inputFile);
+				fileStream = new FileInputStream(inputFile);
 			}
-			
-			if(cmd.hasOption("gz")){
+
+			if (cmd.hasOption("gz")) {
 				inputFile = cmd.getOptionValue("gz");
-				fileStream=new GZIPInputStream(new FileInputStream(inputFile));
+				fileStream = new GZIPInputStream(new FileInputStream(inputFile));
 			}
-			
+
 			ETParser etparser = new ETParser(fileStream, heap, preaccess,
 					postaccess);
 			if (errorLogger != null) {
@@ -272,10 +303,22 @@ public class CommandParser {
 	}
 
 	public static Heuristic heuristicEnumConverter(String s) {
-		if (s.equalsIgnoreCase("first") || s.equalsIgnoreCase("f")) {
+		if (s.equalsIgnoreCase("first") || s.equalsIgnoreCase("fifo")) {
 			return Heuristic.FIRST;
-		} else if (s.equalsIgnoreCase("least") || s.equalsIgnoreCase("l")) {
+		} else if (s.equalsIgnoreCase("least") || s.equalsIgnoreCase("lru")) {
 			return Heuristic.LEASTRECENTLYUSED;
+		} else if (s.equalsIgnoreCase("gc")) {
+			return Heuristic.GC;
+		} else if (s.equalsIgnoreCase("most") || s.equalsIgnoreCase("mru")) {
+			return Heuristic.MOSTRECENTLYUSED;
+		} else if (s.equalsIgnoreCase("smallest") || s.equalsIgnoreCase("ss")) {
+			return Heuristic.SMALLEST;
+		} else if (s.equalsIgnoreCase("largest") || s.equalsIgnoreCase("ls")) {
+			return Heuristic.LARGEST;
+		} else if (s.equalsIgnoreCase("random") || s.equalsIgnoreCase("r")) {
+			return Heuristic.RANDOM;
+		} else if (s.equalsIgnoreCase("last") || s.equalsIgnoreCase("lifo")) {
+			return Heuristic.LAST;
 		}
 		return null;
 

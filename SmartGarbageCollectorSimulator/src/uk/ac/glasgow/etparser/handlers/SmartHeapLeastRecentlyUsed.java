@@ -20,10 +20,12 @@ public class SmartHeapLeastRecentlyUsed extends SmartHeap {
 
 			// take the least recently used object and remove it from the list
 			String currentObjectID = timeOrderedObjects.remove(0).getID();
+			System.out.println(currentObjectID);
 			
 			// kill that object in the ever seen so
 			// it would be treated as a dead object from now on
 			killObject(currentObjectID);
+			deallocate(currentObjectID);
 
 //			 System.out.println("Deallocate "+currentObjectID);
 		}
