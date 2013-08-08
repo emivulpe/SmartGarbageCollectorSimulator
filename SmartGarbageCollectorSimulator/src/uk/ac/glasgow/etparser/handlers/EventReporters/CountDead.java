@@ -66,7 +66,11 @@ public class CountDead implements EventHandler, EventReport {
 					.getLogger()
 					.info((float) dead.size() / totalObjectsInHeap * PERCENTAGE
 							+ " % objects cause dead error");
+			
 		}
+//		for (String d:dead){
+//			System.out.println(d+" ");
+//		}
 		return (float) dead.size() / totalObjectsInHeap * PERCENTAGE
 				+ " % objects cause dead error";
 	}

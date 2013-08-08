@@ -41,7 +41,7 @@ public abstract class SmartHeap extends Heap {
 	}
 
 	protected boolean sizeNormal() {
-		return allocatedMemSize < threshold-(percentageToDeallocate * threshold) && allocatedMemSize >= 0;
+		return allocatedMemSize <= threshold-(percentageToDeallocate * threshold) && allocatedMemSize >= 0;
 	}
 
 

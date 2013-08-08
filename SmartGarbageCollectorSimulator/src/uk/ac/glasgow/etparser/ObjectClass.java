@@ -15,8 +15,7 @@ public class ObjectClass {
 		timeOfLastEvent = t;
 		this.id = id;
 		lastEvent = TypeOfEvent.ALLOCATION;
-		System.out.println("Id "+ id + " size "+size);
-
+//		System.out.println("object id "+id+" size "+size);
 	}
 
 	public int getSize() {
